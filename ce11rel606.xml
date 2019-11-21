@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:ReferenceSet CreatedAt="2018-11-14T15:16:41" MetaType="PacBio.DataSet.ReferenceSet" Name="pacbio_dataset_referenceset-181114_061640963" Tags="" TimeStampedName="pacbio_dataset_referenceset-181114_061640963" UniqueId="cb39761d-0909-8089-5e5e-4d49fa6f2370" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.ContigFile.ContigFastaFile" ResourceId="/glusterfs/hisakatha/ce11rel606/ce11rel606.fa" TimeStampedName="pacbio_contigfile_contigfastafile-181114_061640961" UniqueId="511a5e89-afc3-4507-b423-2dd06b47b558">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.SamIndex" ResourceId="/glusterfs/hisakatha/ce11rel606/ce11rel606.fa.fai" TimeStampedName="pacbio_index_samindex-181114_061640961" UniqueId="554f06be-a7d5-48ae-933b-7979641771e2"/>
+			</pbbase:FileIndices>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>104916213</pbds:TotalLength>
+		<pbds:NumRecords>8</pbds:NumRecords>
+		<pbds:Organism/>
+		<pbds:Ploidy/>
+	</pbds:DataSetMetadata>
+</pbds:ReferenceSet>

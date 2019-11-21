@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="/glusterfs/hisakatha/ce11rel606/ce11rel606.fa" hasGeneTrack="false" hasSequenceTrack="true" locus="chrI:3095273-3403572" nextAutoscaleGroup="3" path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/igv_snapshot/igv_session2.xml" version="8">
+    <Resources>
+        <Resource path="/home/hisakatha/glusterfs/wormbase/c_elegans.PRJNA13758.WS267.annotations.gff3.gz.ucsc_chr.gene_structures.gff"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_k_nopcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.k_normBy_ab.score20_ipdratio2_coverage25.A.gff"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_cd_pcr_vc2010/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.l_normBy_cd.score20_ipdratio2_coverage25.A.gff"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_ab_pcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_l_nopcr_vc2010/mapped.alignmentset.merged.bam.tdf"/>
+    </Resources>
+    <Panel height="1085" name="DataPanel" width="1581">
+        <Track clazz="org.broad.igv.track.SequenceTrack" fontSize="11" height="40" id="Reference sequence" name="Reference sequence" visible="true"/>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_k_nopcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf" name="VC2010+OP50, read coverage of No PCR" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="100.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_ab_pcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf" name="VC2010+OP50, read coverage of PCR" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="100.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_l_nopcr_vc2010/mapped.alignmentset.merged.bam.tdf" name="VC2010, read coverage of No PCR" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="100.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_cd_pcr_vc2010/mapped.alignmentset.merged.bam.tdf" name="VC2010, read coverage of PCR" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="100.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;229.0;255,255,255;0,0,178" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.k_normBy_ab.score20_ipdratio2_coverage25.A.gff" name="VC2010+OP50, high IPD ratio adenines" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;283.0;255,255,255;0,0,178" fontSize="11" height="40" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.l_normBy_cd.score20_ipdratio2_coverage25.A.gff" name="VC2010, high IPD ratio adenines" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;3186.0;255,255,255;0,0,178" displayMode="EXPANDED" fontSize="11" height="40" id="/home/hisakatha/glusterfs/wormbase/c_elegans.PRJNA13758.WS267.annotations.gff3.gz.ucsc_chr.gene_structures.gff" name="WormBase WS267 genes" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.9476268412438625"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

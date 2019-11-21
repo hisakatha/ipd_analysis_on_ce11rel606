@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:SubreadSet CreatedAt="2019-08-27T12:57:55" MetaType="PacBio.DataSet.SubreadSet" Name="pacbio_dataset_subreadset-190827_035754501" Tags="" TimeStampedName="pacbio_dataset_subreadset-190827_035754501" UniqueId="d88added-6dbc-3856-c7fc-302d1d5e968d" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170124_034949/1_A01/m54023_170124_035400.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190827_035754497" UniqueId="dd86e599-e2fb-402e-86cf-91a50cb8ac48">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170124_034949/1_A01/m54023_170124_035400.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190827_035754498" UniqueId="163b2f2b-523d-48d2-85fb-ed151dded4e8"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170124_034949/1_A01/m54023_170124_035400.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190827_035754357" UniqueId="17cb7ac1-621a-4d50-8235-a806c815bdc6">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170124_034949/1_A01/m54023_170124_035400.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190827_035754498" UniqueId="4de9fa7f-37a3-4b57-a975-5fa83cbb5770"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.AdapterFastaFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170124_034949/1_A01/m54023_170124_035400.adapters.fasta" TimeStampedName="pacbio_subreadfile_adapterfastafile-190827_035754370" UniqueId="a2a6b81c-f924-4456-86f6-f90d1c530c49"/>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170126_052859/1_A01/m54023_170126_053635.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190827_035754496" UniqueId="7562a02d-d10c-461d-bbb7-7c31a5e12b54">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170126_052859/1_A01/m54023_170126_053635.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190827_035754497" UniqueId="84c9d4dc-b518-4454-8127-b00a58df6a54"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170126_052859/1_A01/m54023_170126_053635.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190827_035754487" UniqueId="03d0ef9c-ba8f-443b-8af5-29f4da00ec07">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170126_052859/1_A01/m54023_170126_053635.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190827_035754497" UniqueId="80b7f61b-53aa-4bb9-9c1b-30dd2e79d24d"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.AdapterFastaFile" ResourceId="/glusterfs/hisakatha/CB4856sequel/r54023_20170126_052859/1_A01/m54023_170126_053635.adapters.fasta" TimeStampedName="pacbio_subreadfile_adapterfastafile-190827_035754496" UniqueId="915ed881-6835-4e12-b358-d3c4451e85f5"/>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>12033513335</pbds:TotalLength>
+		<pbds:NumRecords>1213149</pbds:NumRecords>
+	</pbds:DataSetMetadata>
+</pbds:SubreadSet>

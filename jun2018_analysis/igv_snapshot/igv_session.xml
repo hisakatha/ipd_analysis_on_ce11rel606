@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="/glusterfs/hisakatha/ce11rel606/ce11rel606.fa" hasGeneTrack="false" hasSequenceTrack="true" locus="chrII:4858461-4858515" path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/igv_snapshot/igv_session.xml" version="8">
+    <Resources>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_k_nopcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.k_normBy_ab.score20_ipdratio2_coverage25.A.gff"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_cd_pcr_vc2010/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.l_normBy_cd.score20_ipdratio2_coverage25.A.gff"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_ab_pcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf"/>
+        <Resource path="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_l_nopcr_vc2010/mapped.alignmentset.merged.bam.tdf"/>
+    </Resources>
+    <Panel height="338" name="DataPanel" width="1277">
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_k_nopcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf" name="mapped.alignmentset.merged.bam.tdf" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="888.86017" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_ab_pcr_vc2010_op50/mapped.alignmentset.merged.bam.tdf" name="mapped.alignmentset.merged.bam.tdf" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="799.13196" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_l_nopcr_vc2010/mapped.alignmentset.merged.bam.tdf" name="mapped.alignmentset.merged.bam.tdf" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="1295.1432" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_cd_pcr_vc2010/mapped.alignmentset.merged.bam.tdf" name="mapped.alignmentset.merged.bam.tdf" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="1972.9344" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="196" name="FeaturePanel" width="1277">
+        <Track clazz="org.broad.igv.track.SequenceTrack" fontSize="11" id="Reference sequence" name="Reference sequence" visible="true"/>
+        <Track clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.k_normBy_ab.score20_ipdratio2_coverage25.A.gff" name="modifications.k_normBy_ab.score20_ipdratio2_coverage25.A.gff" visible="true"/>
+        <Track clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" fontSize="11" id="/home/hisakatha/glusterfs/methylation/smrtpipe/vs_ce11rel606/jun2018_analysis/modifications.l_normBy_cd.score20_ipdratio2_coverage25.A.gff" name="modifications.l_normBy_cd.score20_ipdratio2_coverage25.A.gff" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.6284658040665434"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

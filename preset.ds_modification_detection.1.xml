@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pipeline-preset-template>
+    <task-options>
+        <option id="pbreports.task_options.force_num_regions">
+            <value>False</value>
+        </option>
+        <option id="pbalign.task_options.min_accuracy">
+            <value>70.0</value>
+        </option>
+        <option id="pbalign.task_options.no_split_subreads">
+            <value>False</value>
+        </option>
+        <option id="kinetics_tools.task_options.identify">
+            <value>m6A,m4C</value>
+        </option>
+        <option id="kinetics_tools.task_options.pvalue">
+            <value>0.001</value>
+        </option>
+        <option id="pbalign.task_options.algorithm_options">
+            <value>--minMatch 12 --bestn 10 --minPctSimilarity 70.0 --refineConcordantAlignments</value>
+        </option>
+        <option id="pbreports.task_options.num_regions">
+            <value>1000</value>
+        </option>
+        <option id="kinetics_tools.task_options.max_length">
+            <value>3000000000000</value>
+        </option>
+        <option id="pbalign.task_options.consolidate_aligned_bam">
+            <value>False</value>
+        </option>
+        <option id="pbalign.task_options.min_length">
+            <value>50</value>
+        </option>
+        <option id="kinetics_tools.task_options.compute_methyl_fraction">
+            <value>True</value>
+        </option>
+        <option id="pbreports.task_options.region_size">
+            <value>0</value>
+        </option>
+        <option id="pbalign.task_options.hit_policy">
+            <value>randombest</value>
+        </option>
+        <option id="pbalign.task_options.concordant">
+            <value>True</value>
+        </option>
+        <option id="pbalign.task_options.consolidate_n_files">
+            <value>1</value>
+        </option>
+        <option id="pbreports.task_options.max_region_size">
+            <value>100000</value>
+        </option>
+    </task-options>
+</pipeline-preset-template>
