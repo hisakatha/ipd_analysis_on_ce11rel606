@@ -91,6 +91,8 @@ compare_between_two <- function(data1, name1, data2, name2, targets_chr, targets
         data_with_ipd <- data[is.finite(LOG2IPD1) & is.finite(LOG2IPD2)]
         if (data_with_ipd[,.N] > 0) { 
             p <- ggplot(data_with_ipd, aes(pmin(COV1, COV2), LOG2IPD2 - LOG2IPD1)) + geom_hex(binwidth=c(5,0.2)) + ggtitle(paste0("log_2 IPD (", name2, " / ", name1, ")"), subtitle = title) + ylab(paste0("log_2 IPD (", name2, " / ", name1, ")")) + xlab(paste0("The lower per-strand coverage between ", name1, " and ", name2)) + geom_hline(yintercept = 0, lty = 2) + theme(legend.position = "left");
+            # FIXME: ggMarginal does not work with geom_hex since ggExtra version 0.9.
+            # NOTE: the result of ggMarginal for geom_hex seems wrong (compared to geom_point)
             sp2 <- ggMarginal(p, type = "histogram");
         } else { 
             sp2 <- NULL;
