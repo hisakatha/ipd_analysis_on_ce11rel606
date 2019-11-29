@@ -5,12 +5,10 @@ source("plot.functions.R")
 d <- fread("low_ipd_enrichment.csv")
 d <- d[region != "ALL"]
 #d$region <- factor(d$region, levels = c("ALL", d[region != "ALL", unique(region)]))
-
-rename_region(d)
+set_region_label(d)
 
 pdf("low_ipd_enrichment.plot.pdf", height = 5, width = 12, onefile = TRUE)
-
-ylab_text <- "Fold change of fraction of low IPD bases"
+ylab_text <- "Fold change of fraction of low IPD bases in each region"
 plot.enrichment(d, "ab", ylab_text)
 #plot.intron_details(d, "ab")
 plot.enrichment(d, "cd", ylab_text)
@@ -21,5 +19,19 @@ plot.enrichment(d, "abcd", ylab_text)
 plot.enrichment(d, "PD2182", ylab_text)
 plot.enrichment(d, "PD2182sequel", ylab_text)
 
+plot.enrichment.dual_facet(d, "ab", ylab_text)
+plot.enrichment.dual_facet(d, "cd", ylab_text)
+plot.enrichment.dual_facet(d, "abcd", ylab_text)
+plot.enrichment.dual_facet(d, "PD2182", ylab_text)
+plot.enrichment.dual_facet(d, "PD2182sequel", ylab_text)
 invisible(dev.off())
 
+d <- d[sample != "abcd"]
+pdf("low_ipd_enrichment.plot.all_samples.pdf", height = 8, width = 12, onefile = TRUE)
+plot.enrichment.dual_facet.all_sample(d, ylab_text)
+invisible(dev.off())
+
+pdf("low_ipd_enrichment.plot.all_samples.subset1.pdf", height = 6, width = 5, onefile = TRUE)
+plot.enrichment.dual_facet.all_sample.subset1(d, ylab_text)
+plot.enrichment.dual_facet.all_sample.subset2(d, ylab_text)
+invisible(dev.off())
