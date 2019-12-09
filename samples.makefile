@@ -19,8 +19,8 @@ DEEP_REGION_FA := $(DEEP_REGION).fa
 SLOP := 20
 DEEP_REGION_SLOP := $(DEEP_REGION).slop$(SLOP).bed
 DEEP_REGION_SLOP_FA := $(DEEP_REGION_SLOP).fa
-#DEEP_REGION_SLOP_MERGED := $(DEEP_REGION_SLOP).merged
-#DEEP_REGION_SLOP_MERGED_FA := $(DEEP_REGION_SLOP_MERGED).fa
+DEEP_REGION_SLOP_MERGED := $(DEEP_REGION_SLOP).merged
+DEEP_REGION_SLOP_MERGED_FA := $(DEEP_REGION_SLOP_MERGED).fa
 
 # These files are useless
 #DEEP_REGION_MERGED := $(DEEP_REGION).merged.bed
@@ -108,10 +108,10 @@ $(DEEP_REGION_SLOP_FA): $(DEEP_REGION_SLOP)
 #	$(BEDT) merge -i $< -c 4,5,6 -o first,min,distinct -d -41 | sed -E 's/[-\+],[-\+]/./' > $@
 #$(DEEP_REGION_OVERLAP_MERGED_FA): $(DEEP_REGION_OVERLAP_MERGED)
 #	$(BEDT) getfasta -fi $(REF) -bed $< > $@
-#$(DEEP_REGION_SLOP_MERGED): $(DEEP_REGION_SLOP)
-#	$(BEDT) merge -i $< -c 4,5,6 -o first,min,distinct -s | sed -E 's/[-\+],[-\+]/./' > $@
-#$(DEEP_REGION_SLOP_MERGED_FA): $(DEEP_REGION_SLOP_MERGED)
-#	$(BEDT) getfasta -fi $(REF) -bed $< -s > $@
+$(DEEP_REGION_SLOP_MERGED): $(DEEP_REGION_SLOP)
+	$(BEDT) merge -i $< -c 4,5,6 -o first,min,distinct -s | sed -E 's/[-\+],[-\+]/./' > $@
+$(DEEP_REGION_SLOP_MERGED_FA): $(DEEP_REGION_SLOP_MERGED)
+	$(BEDT) getfasta -fi $(REF) -bed $< -s > $@
 
 # Need to sort BEDGRAPH
 $(BIGWIG_ALL): $(BEDGRAPH)

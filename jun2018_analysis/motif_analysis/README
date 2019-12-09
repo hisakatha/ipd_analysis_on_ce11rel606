@@ -1,1 +1,13 @@
 tandem_repeat_s4: Tandem repeats around gaps described in Supplementary Table S4 of the VC2010 assembly report.
+
+# NOTE: It is important to use non-merged files after slopping/extension (*.slop20.bed.fa),
+# rather than merged files (*.slop20.merged.bed.fa) for locating motifs near feature loci.
+# I want to exclude occurrences of motifs at the edges of extended regions:
+# --xxxxxXxxxxx------------
+# ------------xxxxxXxxxxx--
+# ---YYY-----YYY-----------
+# X: feature locus
+# x: extended region
+# YYY: target motif
+# The first motif should be captured, but the second should be ignored.
+

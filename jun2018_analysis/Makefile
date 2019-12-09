@@ -30,7 +30,8 @@ EXTREME_IPD_TBI := $(EXTREME_IPD_SORTED_GZ:=.tbi)
 
 .DELETE_ON_ERROR:
 .SECONDEXPANSION:
-target = $(TTS_DOWN_MERGED) $(IGV_SCRIPT) $(ENRICH_BOTH_NAMES) $(EXTREME_IPD_TBI) $(EXTREME_IPD_FULL_FA) $(EXTREME_IPD_FULL_MERGED_FA) $(EXTREME_IPD_SORTED_GFF) $(MOD_TBI) $(MOD_FULL_FA) $(MOD_FULL_MERGED_FA) $(DEEP_REGION_SLOP_FA) $(DEEP_REGION_SLOP_MERGED_FA) $(MOD_FULL_CONTEXT)
+target = $(EXTREME_IPD_TBI) $(EXTREME_IPD_FULL_FA) $(EXTREME_IPD_FULL_MERGED_FA) $(EXTREME_IPD_SORTED_GFF) $(MOD_TBI) $(MOD_FULL_FA) $(MOD_FULL_MERGED_FA) $(DEEP_REGION_SLOP_FA) $(DEEP_REGION_SLOP_MERGED_FA) $(MOD_FULL_CONTEXT)
+#target += $(ENRICH_BOTH_NAMES) $(IGV_SCRIPT)
 all: $$(target)
 .PHONY: all
 
@@ -238,7 +239,20 @@ deep_kinetics_region.l_normBy_cd.bed: deep_kinetics_region.l.bed.merged.sorted d
 	bedtools intersect -s -a $< -b $(word 2,$^) -sorted -g $(FAI) | bedtools sort -faidx $(FAI) > $@
 deep_kinetics_region.kl_normBy_abcd.bed: deep_kinetics_region.kl.bed.merged.sorted deep_kinetics_region.abcd.bed.merged.sorted
 	bedtools intersect -s -a $< -b $(word 2,$^) -sorted -g $(FAI) | bedtools sort -faidx $(FAI) > $@
-target += $(DEEP_KINETICS_MERGED_SORTED) $(DEEP_KINETICS2)
+DEEP_KINETICS_BASIC := $(DEEP_KINETICS_MERGED_SORTED) $(DEEP_KINETICS2)
+
+# Intentionally, these are not merged for motif analysis
+DEEP_KINETICS_SLOP := $(DEEP_KINETICS_BASIC:=.slop$(DSLOP).bed)
+$(DEEP_KINETICS_SLOP): %.slop$(DSLOP).bed: %
+	bedtools slop -i $< -g $(FAI) -b $(DSLOP) > $@
+DEEP_KINETICS_SLOP_FA := $(DEEP_KINETICS_SLOP:=.fa)
+$(DEEP_KINETICS_SLOP_FA): %.fa: %
+	bedtools getfasta -bed $< -fi $(FA) > $@
+# For counting the size of the regions
+DEEP_KINETICS_SLOP_MERGED := $(DEEP_KINETICS_SLOP:=.merged)
+$(DEEP_KINETICS_SLOP_MERGED): %.merged: %
+	bedtools sort -i $< -faidx $(FAI) | bedtools merge -s -c 4,5,6 -o distinct,mean,distinct > $@
+target += $(DEEP_KINETICS_BASIC) $(DEEP_KINETICS_SLOP_FA) $(DEEP_KINETICS_SLOP_MERGED)
 
 ## Debug
 print-%  : ; @echo $* = $($*)

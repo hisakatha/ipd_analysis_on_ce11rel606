@@ -6,14 +6,6 @@ ifndef PATTERN
 $(error PATTERN is undefined)
 endif
 
-# pattern occurrence for background
-occ_background := $(PATTERN).ab.bed $(PATTERN).cd.bed $(PATTERN).ce11rel606.bed $(PATTERN).k_normBy_ab.bed $(PATTERN).l_normBy_cd.bed $(PATTERN).PD2182.bed $(PATTERN).PD2182sequel.bed
-# pattern occurrence for features (such as DNA modification and high IPD)
-occ_feature_fa := $(wildcard ../../*.slop20.fullLength.gff.fa)
-occ_feature := $(occ_feature_fa:../../%=$(PATTERN).%.bed)
-occ := $(occ_background) $(occ_feature)
-merged_occ := $(occ:=.merged_occ)
-
 motif_ipds := motif_ipd.ab.csv motif_ipd.cd.csv
 motif_ipdratios := motif_ipdratio.k_normBy_ab.csv motif_ipdratio.l_normBy_cd.csv
 motif_kinetics_csv := $(motif_ipds) motif_ipd.PD2182.csv motif_ipd.PD2182sequel.csv $(motif_ipdratios)
@@ -22,15 +14,25 @@ motif_kinetics_stderr_pdf := plot_motif_kinetics.stderr.pdf
 motif_kinetics_stderr_widey_pdf := plot_motif_kinetics.stderr.wide_y.pdf
 cor_pdf := plot_kinetics_correlation.pdf
 
-target := $(merged_occ) $(motif_kinetics_pdf) $(motif_kinetics_stderr_pdf) $(motif_kinetics_stderr_widey_pdf) $(cor_pdf)
-all: $(target)
+.SECONDEXPANSION:
+target := $(motif_kinetics_pdf) $(motif_kinetics_stderr_pdf) $(motif_kinetics_stderr_widey_pdf) $(cor_pdf)
+all: $$(target)
 
 .DELETE_ON_ERROR:
 
-## occ_background
-#$(occ_background): generate.sh.log
-#generate.sh.log:
-#	../generate.sh $(PATTERN) &> $@ && touch $@
+# NOTE: It is important to use non-merged files after slopping/extension (*.slop20.bed.fa),
+# rather than merged files (*.slop20.merged.bed.fa) for locating motifs near feature loci.
+# I want to exclude occurrences of motifs at the edges of extended regions:
+# --xxxxxXxxxxx------------
+# ------------xxxxxXxxxxx--
+# ---YYY-----YYY-----------
+# X: feature locus
+# x: extended region
+# YYY: target motif
+# The first motif should be captured, but the second should be ignored.
+
+# pattern occurrence for background
+occ_background := $(PATTERN).ab.bed $(PATTERN).cd.bed $(PATTERN).ce11rel606.bed $(PATTERN).k_normBy_ab.bed $(PATTERN).l_normBy_cd.bed $(PATTERN).PD2182.bed $(PATTERN).PD2182sequel.bed
 $(PATTERN).ce11rel606.bed: /glusterfs/hisakatha/ce11rel606/ce11rel606.fa
 	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
 DIR := /glusterfs/hisakatha/methylation/smrtpipe/vs_ce11rel606
@@ -48,12 +50,23 @@ $(PATTERN).k_normBy_ab.bed: $(DIR)/jun2018_analysis/deep_region_cov25.k_normBy_a
 $(PATTERN).l_normBy_cd.bed: $(DIR)/jun2018_analysis/deep_region_cov25.l_normBy_cd.slop20.bed.fa
 	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
 
+deep_kinetics_beds := $(wildcard ../../deep_kinetics_region.*.slop20.bed.fa)
+occ_deep_kinetics := $(deep_kinetics_beds:../../%=$(PATTERN).%.bed)
+$(occ_deep_kinetics): $(PATTERN).%.bed: ../../%
+	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
 
+# pattern occurrence for features (such as DNA modification and high IPD)
+occ_feature_fa := $(wildcard ../../*.slop20.fullLength.gff.fa)
+occ_feature := $(occ_feature_fa:../../%=$(PATTERN).%.bed)
 $(occ_feature): $(PATTERN).%.bed: ../../%
 	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
 
+occ := $(occ_background) $(occ_feature) $(occ_deep_kinetics)
+merged_occ := $(occ:=.merged_occ)
 $(merged_occ): %.merged_occ: %
 	cat $< | ../merge_occurrence.sh > $@ && touch $@
+
+target += $(merged_occ)
 
 # This line requires a lot of RAM
 $(motif_ipds): get_motif_ipd.R.log
