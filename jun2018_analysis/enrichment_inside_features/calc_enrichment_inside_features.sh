@@ -62,7 +62,7 @@ calc_enrichment_in_a_feature () {
     for i in $(seq 0 4); do
         fraction=$(awk -v denom=${callable_with_feature_nums[$i]} -v numer=${input_with_feature_nums[$i]} 'BEGIN{if (denom == 0) {print -1} else {printf "%.7g", numer / denom}}')
         enrichment=$(awk -v denom=${all_fractions[$i]} -v numer=${fraction} 'BEGIN{if (denom == 0) {print -1} else {printf "%.7g", numer / denom}}')
-        pvalue=$(Rscript -e "cat(fisher.test(rbind(c(${all_deep_nums[$i]} - ${all_input_nums[$i]} , ${all_input_nums[$i]} ), c(${callable_with_feature_nums[$i]} - ${input_with_feature_nums[$i]} , ${input_with_feature_nums[$i]} )))\$p.value)")
+        pvalue=$(Rscript -e "cat(binom.test(${input_with_feature_nums[$i]}, ${callable_with_feature_nums[$i]}, p = ${all_fractions[$i]})\$p.value)")
         echo "$INPUT_ID,\"$FEATURE_NAME\",${base_names[$i]},${callable_with_feature_nums[$i]},${input_with_feature_nums[$i]},$fraction,$enrichment,$pvalue"
     done
 }
