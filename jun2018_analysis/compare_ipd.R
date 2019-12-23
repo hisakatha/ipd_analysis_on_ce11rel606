@@ -49,6 +49,7 @@ plot_ipd_for_2sets <- function(data, name, a.name, b.name) {
             geom_abline(intercept = 0, slope = 1, linetype = "dashed") + ggtitle(sprintf("Base: %s", b)) + xlab(x.label) + ylab(y.label)
         if(subdata[,.N] == 0){ p_linear <- ggplot() + annotate("text", x = 1, y = 1, label = "No data") }
         p_log <- p_linear + scale_fill_continuous(trans = "log10")
+        # TODO: replace ggMarginal
         p_linear <- ggMarginal(p_linear, type = "histogram", binwidth = binwd)
         p_log <- ggMarginal(p_log, type = "histogram", binwidth = binwd)
         p_linear_list <- c(p_linear_list, list(p_linear))
@@ -77,6 +78,7 @@ plot_ipd_for_2sets <- function(data, name, a.name, b.name) {
             geom_abline(intercept = 0, slope = 1, linetype = "dashed") + ggtitle(sprintf("Base: %s", b)) + xlab(x.label) + ylab(y.label)
         if(subdata[,.N] == 0){ p_linear <- ggplot() + annotate("text", x = 1, y = 1, label = "No data") }
         p_log <- p_linear + scale_fill_continuous(trans = "log10")
+        # TODO: replace ggMarginal
         p_linear <- ggMarginal(p_linear, type = "histogram", binwidth = binwd)
         p_log <- ggMarginal(p_log, type = "histogram", binwidth = binwd)
         p_linear_list <- c(p_linear_list, list(p_linear))
@@ -113,9 +115,9 @@ p_all <- c(p_all, list(plot_ipd_for_2sets(union_data1[a.refName == ecoli_chr], "
 p_all <- c(p_all, list(plot_ipd_for_2sets(union_data2, "Intersection of AB_WGA_VC2010_OP50 and K_native_VC2010_OP50", "AB_WGA_VC2010_OP50", "K_native_VC2010_OP50")))
 p_all <- c(p_all, list(plot_ipd_for_2sets(union_data2[a.refName != ecoli_chr], "Intersection of AB_WGA_VC2010_OP50 and K_native_VC2010_OP50 in C. elegans", "AB_WGA_VC2010_OP50", "K_native_VC2010_OP50")))
 p_all <- c(p_all, list(plot_ipd_for_2sets(union_data2[a.refName == ecoli_chr], "Intersection of AB_WGA_VC2010_OP50 and K_native_VC2010_OP50 in E. coli", "AB_WGA_VC2010_OP50", "K_native_VC2010_OP50")))
-p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3, "Intersection of CD_WGA_VC2010 and L_native_VC2010", "AB_WGA_VC2010_OP50", "L_native_VC2010")))
-p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3[a.refName != ecoli_chr], "Intersection of CD_WGA_VC2010 and L_native_VC2010 in C. elegans", "AB_WGA_VC2010_OP50", "L_native_VC2010")))
-p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3[a.refName == ecoli_chr], "Intersection of CD_WGA_VC2010 and L_native_VC2010 in E. coli", "AB_WGA_VC2010_OP50", "L_native_VC2010")))
+p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3, "Intersection of CD_WGA_VC2010 and L_native_VC2010", "CD_WGA_VC2010", "L_native_VC2010")))
+p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3[a.refName != ecoli_chr], "Intersection of CD_WGA_VC2010 and L_native_VC2010 in C. elegans", "CD_WGA_VC2010", "L_native_VC2010")))
+p_all <- c(p_all, list(plot_ipd_for_2sets(union_data3[a.refName == ecoli_chr], "Intersection of CD_WGA_VC2010 and L_native_VC2010 in E. coli", "CD_WGA_VC2010", "L_native_VC2010")))
 invisible(dev.off())
 pdf(sprintf("compare_ipd.coverage%g.pdf", coverage_thres), width = pdf_width, height = pdf_height)
 for (p in p_all){
