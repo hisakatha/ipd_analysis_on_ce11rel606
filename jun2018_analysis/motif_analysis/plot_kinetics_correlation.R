@@ -47,8 +47,8 @@ corrplot.na <- function (input_table) {
     }
     cors <- cor(input_table)
     if (any(is.na(input_table))) {
-        corrplot(cors, method = "color", type = "upper")
-        corrplot(cors, method = "number", type = "upper")
+        corrplot(cors, method = "color", type = "upper", tl.col = "black")
+        corrplot(cors, method = "number", type = "upper", tl.col = "black")
     } else {
         pvalues <- cor.mtest(input_table)$p
         corrplot(cors, p.mat = pvalues, method = "color", type = "upper",
@@ -56,7 +56,7 @@ corrplot.na <- function (input_table) {
                  insig = "label_sig", pch.col = "white", tl.col = "black")
         pvalues[lower.tri(pvalues)] <- NA
         corrplot.mixed(cors, p.mat = pvalues, sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", lower = "number", upper = "color",
-                       tl.col = "black", tl.cex = 0.8, pch.cex = 0.9, pch.col = "white")
+                       tl.col = "black", tl.cex = 0.8, pch.cex = 0.9, pch.col = "white", lower.col = "black")
     }
 }
 
