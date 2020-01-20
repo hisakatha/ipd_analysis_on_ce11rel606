@@ -7,15 +7,18 @@ $(error PATTERN is undefined)
 endif
 
 motif_ipds := motif_ipd.ab.csv motif_ipd.cd.csv
+motif_wga_ipdratios := motif_ipdratio.ab.csv motif_ipdratio.cd.csv
+motif_hawaiian_ipdratios := motif_ipdratio.PD2182.csv motif_ipdratio.PD2182sequel.csv
 motif_ipdratios := motif_ipdratio.k_normBy_ab.csv motif_ipdratio.l_normBy_cd.csv
 motif_kinetics_csv := $(motif_ipds) motif_ipd.PD2182.csv motif_ipd.PD2182sequel.csv $(motif_ipdratios)
 motif_kinetics_pdf := plot_motif_kinetics.pdf
 motif_kinetics_stderr_pdf := plot_motif_kinetics.stderr.pdf
 motif_kinetics_stderr_widey_pdf := plot_motif_kinetics.stderr.wide_y.pdf
 cor_pdf := plot_kinetics_correlation.pdf
+cor_pdf2 := plot_ipdratio_correlation.pdf
 
 .SECONDEXPANSION:
-target := $(motif_kinetics_pdf) $(motif_kinetics_stderr_pdf) $(motif_kinetics_stderr_widey_pdf) $(cor_pdf)
+target := $(motif_kinetics_pdf) $(motif_kinetics_stderr_pdf) $(motif_kinetics_stderr_widey_pdf) $(cor_pdf) $(motif_wga_ipdratios) $(motif_hawaiian_ipdratios) $(cor_pdf2)
 all: $$(target)
 
 .DELETE_ON_ERROR:
@@ -68,21 +71,28 @@ $(merged_occ): %.merged_occ: %
 
 target += $(merged_occ)
 
-# This line requires a lot of RAM
+# These lines require a lot of RAM
 $(motif_ipds): get_motif_ipd.R.log
 	touch $@
 get_motif_ipd.R.log: $(PATTERN).ab.bed.merged_occ $(PATTERN).cd.bed.merged_occ
 	Rscript ../get_motif_ipd.v2.R $(PATTERN) &> $@ && touch $@
+$(motif_wga_ipdratios): get_motif_wga_ipdratio.R.log
+	touch $@
+get_motif_wga_ipdratio.R.log: $(PATTERN).ab.bed.merged_occ $(PATTERN).cd.bed.merged_occ
+	Rscript ../get_motif_wga_ipdratio.R $(PATTERN) &> $@ && touch $@
 motif_ipd.PD2182.csv: $(PATTERN).PD2182.bed.merged_occ
 	Rscript ../get_motif_ipd.PD2182.v2.R $(PATTERN) &> get_motif_ipd.PD2182.R.log && touch $@
 motif_ipd.PD2182sequel.csv: $(PATTERN).PD2182sequel.bed.merged_occ
 	Rscript ../get_motif_ipd.PD2182sequel.v2.R $(PATTERN) &> get_motif_ipd.PD2182sequel.R.log && touch $@
-
-# This line requires a lot of RAM
 $(motif_ipdratios): get_motif_ipdratio.R.log
 	touch $@
 get_motif_ipdratio.R.log: $(PATTERN).k_normBy_ab.bed.merged_occ $(PATTERN).l_normBy_cd.bed.merged_occ
 	Rscript ../get_motif_ipdratio.v2.R $(PATTERN) &> $@ && touch $@
+
+motif_ipdratio.PD2182.csv: $(PATTERN).PD2182.bed.merged_occ
+	Rscript ../get_motif_ipdratio.PD2182.R $(PATTERN) &> get_motif_ipdratio.PD2182.R.log && touch $@
+motif_ipdratio.PD2182sequel.csv: $(PATTERN).PD2182sequel.bed.merged_occ
+	Rscript ../get_motif_ipdratio.PD2182sequel.R $(PATTERN) &> get_motif_ipdratio.PD2182sequel.R.log && touch $@
 
 $(motif_kinetics_pdf): $(motif_kinetics_csv)
 	Rscript ../plot_motif_kinetics.R $(PATTERN) && touch $@
@@ -95,3 +105,6 @@ $(motif_kinetics_stderr_widey_pdf): $(motif_kinetics_csv)
 
 $(cor_pdf): $(motif_kinetics_csv)
 	Rscript ../plot_kinetics_correlation.R
+
+$(cor_pdf2): $(motif_wga_ipdratios) $(motif_hawaiian_ipdratios)
+	Rscript ../plot_ipdratio_correlation.R
