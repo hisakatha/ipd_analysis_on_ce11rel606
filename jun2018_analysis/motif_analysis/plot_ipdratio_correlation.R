@@ -6,7 +6,8 @@ mean_log2value <- function(kinetics) {
     if (kinetics[, .N] == 0) {
         data.table(position = numeric(0), strand = character(0), m = numeric(0))
     } else {
-        kinetics[value > 0 & is.finite(value)][, .(position, strand, log2value = log2(value))][, .(m = mean(log2value)), by = .(position, strand)]
+        # Use only the motif region
+        kinetics[value > 0 & is.finite(value) & substr(label, 1, 1) == "m"][, .(position, strand, log2value = log2(value))][, .(m = mean(log2value)), by = .(position, strand)]
     }
 }
 
