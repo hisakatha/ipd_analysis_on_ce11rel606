@@ -1,0 +1,49 @@
+<dreme version="5.0.5" release="Mon Mar 18 20:12:19 2019 -0700">
+  <model>
+    <command_line>dreme -verbosity 1 -oc dreme_out -png -dna -p ./seqs-centered -n ./seqs-shuffled -t 5320 -e 0.05</command_line>
+    <positives name="seqs-centered" count="270951" file="./seqs-centered" last_mod_date="Wed Mar 27 19:39:19 JST 2019" />
+    <negatives name="seqs-shuffled" count="270951" from="file" file="./seqs-shuffled" last_mod_date="Wed Mar 27 19:39:19 JST 2019" />
+    <alphabet name="DNA" like="dna">
+      <letter id="A" symbol="A" complement="T" name="Adenine" colour="CC0000"/>
+      <letter id="C" symbol="C" complement="G" name="Cytosine" colour="0000CC"/>
+      <letter id="G" symbol="G" complement="C" name="Guanine" colour="FFB300"/>
+      <letter id="T" symbol="T" aliases="U" complement="A" name="Thymine" colour="008000"/>
+      <letter id="N" symbol="N" aliases="X." equals="ACGT" name="Any base"/>
+      <letter id="V" symbol="V" equals="ACG" name="Not T"/>
+      <letter id="H" symbol="H" equals="ACT" name="Not G"/>
+      <letter id="D" symbol="D" equals="AGT" name="Not C"/>
+      <letter id="B" symbol="B" equals="CGT" name="Not A"/>
+      <letter id="M" symbol="M" equals="AC" name="Amino"/>
+      <letter id="R" symbol="R" equals="AG" name="Purine"/>
+      <letter id="W" symbol="W" equals="AT" name="Weak"/>
+      <letter id="S" symbol="S" equals="CG" name="Strong"/>
+      <letter id="Y" symbol="Y" equals="CT" name="Pyrimidine"/>
+      <letter id="K" symbol="K" equals="GT" name="Keto"/>
+    </alphabet>
+    <strands>both</strands>
+    <!-- background A="0.308" C="0.186" G="0.203" T="0.303" from="dataset"/>
+    <stop evalue="0.05" time="5320"/ -->
+    <ngen>100</ngen>
+    <add_pv_thresh>0.01</add_pv_thresh>
+    <seed>1</seed>
+    <!-- host>ax02</host>
+    <when>Wed Mar 27 20:55:11 JST 2019</when -->
+  </model>
+  <motifs>
+    <motif id="m01" alt="DREME-1" seq="CTGDAR" length="6" nsites="54200" p="48689" n="28653" pvalue="1.2e-1330" evalue="5.7e-1326" unerased_evalue="5.7e-1326">
+      <pos A="0.000000" C="1.000000" G="0.000000" T="0.000000"/>
+      <pos A="1.000000" C="0.000000" G="0.000000" T="1.000000"/>
+      <pos A="1.000000" C="0.000000" G="1.000000" T="0.000000"/>
+      <pos A="1.000000" C="0.333333" G="0.333333" T="0.333333"/>
+      <pos A="1.000000" C="0.000000" G="0.000000" T="0.000000"/>
+      <pos A="0.500000" C="0.000000" G="0.500000" T="0.000000"/>
+      <!-- match seq="CTGAAA" p="18953" n="10257" pvalue="1.6e-605" evalue="7.7e-601"/>
+      <match seq="CTGGAA" p="10490" n="5080" pvalue="1.7e-431" evalue="7.7e-427"/>
+      <match seq="CTGTAG" p="5665" n="2369" pvalue="2.1e-309" evalue="1.0e-304"/>
+      <match seq="CTGGAG" p="5182" n="2956" pvalue="2.5e-138" evalue="1.2e-133"/>
+      <match seq="CTGTAA" p="5318" n="3919" pvalue="3.3e-049" evalue="1.5e-044"/>
+      <match seq="CTGAAG" p="5925" n="5062" pvalue="4.7e-017" evalue="2.2e-012"/ -->
+    </motif>
+  </motifs>
+  <run_time cpu="5320.84" real="5319.52" stop="time"/>
+</dreme>
