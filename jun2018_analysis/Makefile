@@ -14,6 +14,8 @@ FAI := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa.fai
 #EXTREME_IPD := $(wildcard extreme_ipd.*.gff)
 EXTREME_IPD := $(shell ls extreme_ipd.*.gff | grep -E 'extreme_ipd\.[^\.]+\.[^\.]+(\.coverage[0-9]+)?.gff')
 EXTREME_IPD_SORTED_GFF := $(EXTREME_IPD:.gff=.sorted.gff)
+EXTREME_IPD_SORTED_Celegans_GFF := $(EXTREME_IPD_SORTED_GFF:.gff=.c_elegans.gff)
+EXTREME_IPD_SORTED_Ecoli_GFF := $(EXTREME_IPD_SORTED_GFF:.gff=.e_coli.gff)
 SLOP := 20
 EXTREME_IPD_SLOP := $(EXTREME_IPD:.gff=.slop$(SLOP).gff)
 EXTREME_IPD_FA := $(EXTREME_IPD_SLOP:=.fa)
@@ -28,9 +30,14 @@ EXTREME_IPD_CONTEXT := $(EXTREME_IPD:.gff=.withContext.gff)
 EXTREME_IPD_SORTED_GZ := $(EXTREME_IPD_CONTEXT:.gff=.sorted.gff.gz)
 EXTREME_IPD_TBI := $(EXTREME_IPD_SORTED_GZ:=.tbi)
 
+EXTREME_IPD_FULL_Celegans := $(EXTREME_IPD_FULL:.gff=.c_elegans.gff)
+EXTREME_IPD_FULL_Ecoli := $(EXTREME_IPD_FULL:.gff=.e_coli.gff)
+EXTREME_IPD_FULL_Celegans_FA := $(EXTREME_IPD_FULL_Celegans:=.fa)
+EXTREME_IPD_FULL_Ecoli_FA := $(EXTREME_IPD_FULL_Ecoli:=.fa)
+
 .DELETE_ON_ERROR:
 .SECONDEXPANSION:
-target = $(EXTREME_IPD_TBI) $(EXTREME_IPD_FULL_FA) $(EXTREME_IPD_FULL_MERGED_FA) $(EXTREME_IPD_SORTED_GFF) $(MOD_TBI) $(MOD_FULL_FA) $(MOD_FULL_MERGED_FA) $(DEEP_REGION_SLOP_FA) $(DEEP_REGION_SLOP_MERGED_FA) $(MOD_FULL_CONTEXT)
+target = $(EXTREME_IPD_TBI) $(EXTREME_IPD_FULL_FA) $(EXTREME_IPD_FULL_MERGED_FA) $(EXTREME_IPD_SORTED_GFF) $(MOD_TBI) $(MOD_FULL_FA) $(MOD_FULL_MERGED_FA) $(DEEP_REGION_SLOP_FA) $(DEEP_REGION_SLOP_MERGED_FA) $(MOD_FULL_CONTEXT) $(EXTREME_IPD_FULL_Celegans_FA) $(EXTREME_IPD_FULL_Ecoli_FA) $(EXTREME_IPD_SORTED_Celegans_GFF) $(EXTREME_IPD_SORTED_Ecoli_GFF)
 #target += $(ENRICH_BOTH_NAMES) $(IGV_SCRIPT)
 all: $$(target)
 .PHONY: all
@@ -51,6 +58,12 @@ $(ENRICH_BOTH_NAMES): $(ENRICH_BOTH_CSV)
 $(EXTREME_IPD_SORTED_GFF): %.sorted.gff: %.gff
 	bedtools sort -header -faidx $(FAI) -i $< > $@
 
+$(EXTREME_IPD_SORTED_Celegans_GFF): %.c_elegans.gff: %.gff
+	(cat $< | grep -v "E._coli" || [[ $$? == 1 ]]) > $@
+
+$(EXTREME_IPD_SORTED_Ecoli_GFF): %.e_coli.gff: %.gff
+	(cat $< | grep "E._coli" || [[ $$? == 1 ]]) > $@
+
 $(EXTREME_IPD_SLOP): %.slop$(SLOP).gff: %.gff
 	bedtools slop -header -i $< -g $(FAI) -b $(SLOP) > $@
 
@@ -63,6 +76,18 @@ $(EXTREME_IPD_FULL): %.fullLength.gff: %.gff
 $(EXTREME_IPD_FULL_FA): %.fullLength.gff.fa: %.fullLength.gff %.gff.fa
 	cat $< | bedtools getfasta -bed - -fi $(FA) -s > $@
 	@cmp $@ $(word 2,$^) || echo "WARNING: There are partial-length regions in $<. You have to use $@ for MEME." >&2
+
+$(EXTREME_IPD_FULL_Celegans): %.c_elegans.gff: %.gff
+	(cat $< | grep -v "E._coli" || [[ $$? == 1 ]]) > $@
+
+$(EXTREME_IPD_FULL_Celegans_FA): %.fa: %
+	cat $< | bedtools getfasta -bed - -fi $(FA) -s > $@
+
+$(EXTREME_IPD_FULL_Ecoli): %.e_coli.gff: %.gff
+	(cat $< | grep "E._coli" || [[ $$? == 1 ]]) > $@
+
+$(EXTREME_IPD_FULL_Ecoli_FA): %.fa: %
+	cat $< | bedtools getfasta -bed - -fi $(FA) -s > $@
 
 $(EXTREME_IPD_FULL_MERGED): %.merged: %
 	bedtools sort -i $< -faidx $(FAI) | bedtools merge -s -c 3,6,7 -o distinct,mean,distinct > $@
@@ -241,6 +266,14 @@ deep_kinetics_region.kl_normBy_abcd.bed: deep_kinetics_region.kl.bed.merged.sort
 	bedtools intersect -s -a $< -b $(word 2,$^) -sorted -g $(FAI) | bedtools sort -faidx $(FAI) > $@
 DEEP_KINETICS_BASIC := $(DEEP_KINETICS_MERGED_SORTED) $(DEEP_KINETICS2)
 
+DEEP_KINETICS_Celegans := $(DEEP_KINETICS_BASIC:=.c_elegans.bed)
+$(DEEP_KINETICS_Celegans): %.c_elegans.bed: %
+	(cat $< | grep -v "E._coli" || [[ $$? == 1 ]]) > $@
+DEEP_KINETICS_Ecoli := $(DEEP_KINETICS_BASIC:=.e_coli.bed)
+$(DEEP_KINETICS_Ecoli): %.e_coli.bed: %
+	(cat $< | grep "E._coli" || [[ $$? == 1 ]]) > $@
+target += $(DEEP_KINETICS_Celegans) $(DEEP_KINETICS_Ecoli)
+
 # Intentionally, these are not merged for motif analysis
 DEEP_KINETICS_SLOP := $(DEEP_KINETICS_BASIC:=.slop$(DSLOP).bed)
 $(DEEP_KINETICS_SLOP): %.slop$(DSLOP).bed: %
@@ -248,11 +281,17 @@ $(DEEP_KINETICS_SLOP): %.slop$(DSLOP).bed: %
 DEEP_KINETICS_SLOP_FA := $(DEEP_KINETICS_SLOP:=.fa)
 $(DEEP_KINETICS_SLOP_FA): %.fa: %
 	bedtools getfasta -bed $< -fi $(FA) > $@
+DEEP_KINETICS_SLOP_Celegans_FA := $(DEEP_KINETICS_SLOP:.bed=.c_elegans.bed.fa)
+$(DEEP_KINETICS_SLOP_Celegans_FA): %.c_elegans.bed.fa: %.bed
+	(cat $< | grep -v "E._coli" || [[ $$? == 1 ]]) | bedtools getfasta -bed - -fi $(FA) > $@
+DEEP_KINETICS_SLOP_Ecoli_FA := $(DEEP_KINETICS_SLOP:.bed=.e_coli.bed.fa)
+$(DEEP_KINETICS_SLOP_Ecoli_FA): %.e_coli.bed.fa: %.bed
+	(cat $< | grep "E._coli" || [[ $$? == 1 ]]) | bedtools getfasta -bed - -fi $(FA) > $@
 # For counting the size of the regions
 DEEP_KINETICS_SLOP_MERGED := $(DEEP_KINETICS_SLOP:=.merged)
 $(DEEP_KINETICS_SLOP_MERGED): %.merged: %
 	bedtools sort -i $< -faidx $(FAI) | bedtools merge -s -c 4,5,6 -o distinct,mean,distinct > $@
-target += $(DEEP_KINETICS_BASIC) $(DEEP_KINETICS_SLOP_FA) $(DEEP_KINETICS_SLOP_MERGED)
+target += $(DEEP_KINETICS_BASIC) $(DEEP_KINETICS_SLOP_FA) $(DEEP_KINETICS_SLOP_MERGED) $(DEEP_KINETICS_SLOP_Celegans_FA) $(DEEP_KINETICS_SLOP_Ecoli_FA)
 
 ## Debug
 print-%  : ; @echo $* = $($*)
