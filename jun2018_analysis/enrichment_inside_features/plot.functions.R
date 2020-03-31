@@ -181,7 +181,7 @@ plot.enrichment.dual_facet.all_sample.subset3.v2 <- function(data, ylab_text) {
     sub_data[, "sample" := factor(sample, levels = c("VC2010+OP50/WGA", "VC2010/WGA", "VC2010+OP50/native", "VC2010/native", "PD2182 (PacBio RS II)", "PD2182 (PacBio Sequel v1.2)", "VC2010+OP50", "VC2010"))]
     sub_data <- sub_data[region == "promoter" | region == "exon" | region == "intron" | region == "three prime utr" | region == "TTS [0, 500]" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
-        geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 8 / ggplot2::.pt) +
+        geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 10 / ggplot2::.pt) +
         xlab("Sample") + ylab(ylab_text) + geom_hline(yintercept = 1, alpha = 0.5) +
         theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5), plot.title = element_text(hjust = 0.5)) +
         scale_y_continuous(expand = expand_scale(mult = c(0.1, 0.2)))

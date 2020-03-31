@@ -118,6 +118,14 @@ $(EXTREME_IPD_TBI): %.tbi: %
 MOD := $(shell ls modifications.*.gff | grep -E 'modifications\.[^\.]+\.[^\.]+(\.[ACGT])?\.gff')
 MSLOP := 20
 
+#MOD_Celegans := $(MOD:.gff=.c_elegans.gff)
+MOD_Celegans := modifications.k_normBy_ab.score20_ipdratio2_coverage25.c_elegans.gff \
+	modifications.l_normBy_cd.score20_ipdratio2_coverage25.c_elegans.gff \
+	modifications.kl_normBy_abcd.score20_ipdratio2_coverage25.c_elegans.gff
+$(MOD_Celegans): %.c_elegans.gff: %.gff
+	(cat $< | grep "^#"; cat $< | grep -v "^#" | grep -v "E._coli" || [[ $$? == 1 ]]) > $@
+target += $(MOD_Celegans)
+
 MOD_SLOP := $(MOD:.gff=.slop$(MSLOP).gff)
 $(MOD_SLOP): %.slop$(MSLOP).gff: %.gff
 	bedtools slop -header -i $< -g $(FAI) -b $(MSLOP) > $@
