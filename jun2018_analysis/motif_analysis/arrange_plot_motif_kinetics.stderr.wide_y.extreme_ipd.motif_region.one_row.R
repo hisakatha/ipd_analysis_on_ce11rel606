@@ -66,7 +66,10 @@ PD2182_log2ipd_mean <- -0.144740199751773
 PD2182_log2ipd_var <- 0.4165849
 PD2182_log2ipd_size <- 1356981
 PD2182sequel_log2ipd_mean <- -0.192455782396496
+
+# NOTE: this value is WRONG, but preserved!!
 PD2182sequel_log2ipd_var <- 0.8454646
+
 PD2182sequel_log2ipd_size <- 166271875
 k_normBy_ab_log2ipdratio_mean <- -0.008352887
 k_normBy_ab_log2ipdratio_var <- 0.3137371
@@ -122,7 +125,7 @@ pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.ab.pdf", wid
 plot_grid(plotlist = ab_plots[motifs_high_ipd], align = "none", nrow = 1)
 plot_grid(plotlist = ab_plots[motifs_low_ipd], align = "none", nrow = 1)
 invisible(dev.off())
-pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.onw_row.cd.pdf", width = pdf_width, height = pdf_height)
+pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.cd.pdf", width = pdf_width, height = pdf_height)
 plot_grid(plotlist = cd_plots[motifs_high_ipd], align = "none", nrow = 1)
 plot_grid(plotlist = cd_plots[motifs_low_ipd], align = "none", nrow = 1)
 invisible(dev.off())

@@ -58,7 +58,7 @@ source("../../load_and_save_PD2182sequel_data.saved.fst.PD2182sequel.R", chdir =
 #bed_col <- c("chr", "start", "end", "name", "score", "strand")
 merged_occ_col <- c("chr", "start", "strand")
 
-PD2182sequel_occ <- fread(paste0(motif, ".PD2182sequel.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
+PD2182sequel_occ <- fread(paste0(motif, ".deep_kinetics_region.PD2182sequel.bed.merged.sorted.slop20.bed.fa.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
 
 reference_skip <- c(0, cumsum(width(reference)) * 2)
 names(reference_skip) <- names(reference)

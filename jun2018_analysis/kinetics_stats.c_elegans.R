@@ -40,6 +40,12 @@ ab_stats2 <- get_stats_per_base(ab_data_deep[, "value" := .(log2(ipdRatio))], "a
 cd_stats2 <- get_stats_per_base(cd_data_deep[, "value" := .(log2(ipdRatio))], "cd_deep", "log2_IPD_ratio")
 PD2182_stats2 <- get_stats_per_base(PD2182_data_deep[, "value" := .(log2(ipdRatio))], "PD2182_deep", "log2_IPD_ratio")
 PD2182sequel_stats2 <- get_stats_per_base(PD2182sequel_data_deep[, "value" := .(log2(ipdRatio))], "PD2182sequel_deep", "log2_IPD_ratio")
+ab_stats3 <- get_stats_per_base(ab_data_deep[, "value" := .(log2(modelPrediction))], "ab_deep", "log2_modelPrediction")
+cd_stats3 <- get_stats_per_base(cd_data_deep[, "value" := .(log2(modelPrediction))], "cd_deep", "log2_modelPrediction")
+PD2182_stats3 <- get_stats_per_base(PD2182_data_deep[, "value" := .(log2(modelPrediction))], "PD2182_deep", "log2_modelPrediction")
+PD2182sequel_stats3 <- get_stats_per_base(PD2182sequel_data_deep[, "value" := .(log2(modelPrediction))], "PD2182sequel_deep", "log2_modelPrediction")
 
-all_stats <- rbindlist(list(ab_stats, cd_stats, k_stats, l_stats, abcd_stats, kl_stats, PD2182_stats, PD2182sequel_stats, k_normBy_ab_stats, l_normBy_cd_stats, kl_normBy_abcd_stats, ab_stats2, cd_stats2, PD2182_stats2, PD2182sequel_stats2))
+all_stats <- rbindlist(list(ab_stats, cd_stats, k_stats, l_stats, abcd_stats, kl_stats, PD2182_stats, PD2182sequel_stats, k_normBy_ab_stats, l_normBy_cd_stats, kl_normBy_abcd_stats,
+                            ab_stats2, cd_stats2, PD2182_stats2, PD2182sequel_stats2,
+                            ab_stats3, cd_stats3, PD2182_stats3, PD2182sequel_stats3))
 fwrite(all_stats, file = "kinetics_stats.c_elegans.csv")

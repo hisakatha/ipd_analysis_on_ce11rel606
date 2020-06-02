@@ -58,8 +58,8 @@ source("../../load_jun2018_data.saved.fst.basic_normalized.R", chdir = TRUE)
 #bed_col <- c("chr", "start", "end", "name", "score", "strand")
 merged_occ_col <- c("chr", "start", "strand")
 
-k_normBy_ab_occ <- fread(paste0(motif, ".k_normBy_ab.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
-l_normBy_cd_occ <- fread(paste0(motif, ".l_normBy_cd.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
+k_normBy_ab_occ <- fread(paste0(motif, ".deep_kinetics_region.k_normBy_ab.bed.slop20.bed.fa.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
+l_normBy_cd_occ <- fread(paste0(motif, ".deep_kinetics_region.l_normBy_cd.bed.slop20.bed.fa.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
 
 reference_skip <- c(0, cumsum(width(reference)) * 2)
 names(reference_skip) <- names(reference)

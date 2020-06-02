@@ -58,8 +58,8 @@ source("../../load_jun2018_data.saved.fst.basic_wga.R", chdir = TRUE)
 #bed_col <- c("chr", "start", "end", "name", "score", "strand")
 merged_occ_col <- c("chr", "start", "strand")
 
-ab_occ <- fread(paste0("motif_occ.ab.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
-cd_occ <- fread(paste0("motif_occ.cd.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
+ab_occ <- fread(paste0("motif_occ.deep_kinetics_region.ab.bed.merged.sorted.slop20.bed.fa.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
+cd_occ <- fread(paste0("motif_occ.deep_kinetics_region.cd.bed.merged.sorted.slop20.bed.fa.bed.merged_occ"), sep = " ", col.names = merged_occ_col)
 
 reference_skip <- c(0, cumsum(width(reference)) * 2)
 names(reference_skip) <- names(reference)
