@@ -1,0 +1,7 @@
+library(data.table)
+d_celegans <- fread("motif_kinetics_statistical_tests.c_elegans.csv")
+setorder(d_celegans, pvalue)
+fwrite(d_celegans, file = "motif_kinetics_statistical_tests.c_elegans.sorted_pvalue.csv")
+d_ecoli <- fread("motif_kinetics_statistical_tests.e_coli.csv")
+setorder(d_ecoli, pvalue)
+fwrite(d_ecoli, file = "motif_kinetics_statistical_tests.e_coli.sorted_pvalue.csv")

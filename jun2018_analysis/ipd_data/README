@@ -1,0 +1,33 @@
+# Coverage threshold
+
+The threshold of read coverage (precisely, valid IPD counts after filtering out outliers) is 25.
+
+# Sample
+
+ab: VC2010+OP50/WGA
+cd: VC2010/WGA
+k: VC2010+OP50/native
+l: VC2010/native
+PD2182: PD2182 (PacBio RS II) (native)
+PD2182sequel: PD2182 (PacBio Sequel) (native)
+
+# raw IPD values at the top 1%, including reads on E. coli
+ab: 3.08223
+cd: 3.05611
+k: 3.00578
+l: 2.98747
+PD2182: 3.71169
+PD2182sequel: 4.17400
+# raw IPD values at the bottom 1%, including reads on E. coli
+ab: 0.30158
+cd: 0.29231
+k: 0.27752
+l: 0.28032
+PD2182: 0.38372
+PD2182sequel: 0.35110
+
+# max of raw IPDs with coverage >= 25 among all the six samples, which was in sample cd
+max: 61.35193
+
+# min of raw IPDs with coverage >= 25 among all the six samples, which was in sample cd
+min: 0.06084

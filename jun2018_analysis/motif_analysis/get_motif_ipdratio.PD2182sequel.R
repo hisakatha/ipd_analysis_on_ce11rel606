@@ -1,4 +1,6 @@
 library(data.table)
+library(doParallel)
+registerDoParallel()
 args <- commandArgs(trailingOnly = TRUE)
 motif <- args[1]
 motif_length <- nchar(motif)
@@ -21,8 +23,7 @@ get_motif_ipdratio <- function(data, occ, out, ref_skips){
     col_names_end <- paste0("e", rep(1:end_margin, each=2), c("p", "n"))
     col_names <- c(col_names_start, col_names_motif, col_names_end)
     occ_n <- nrow(occ)
-    current_table_list <- list()
-    for (i in 1:occ_n){
+    table_list <- foreach(i = 1:occ_n) %dopar% {
         occ_chr <- occ[i, chr]
         occ_start <- occ[i, start]
         index_start <- occ_start - start_margin
@@ -43,13 +44,15 @@ get_motif_ipdratio <- function(data, occ, out, ref_skips){
             print(occ[i])
             stop()
         }
-        current_table_list <- c(current_table_list, list(data.table(position = rep(1:collect_length, each = 2),
-                                                           strand = rep(c("+","-"), collect_length),
-                                                           value = out_values,
-                                                           label = col_names,
-                                                           src = i)))
+        data.table(position = rep(1:collect_length, each = 2),
+            strand = rep(c("+","-"), collect_length),
+            value = out_values,
+            label = col_names,
+            src = i)
     }
-    out_data_table <- rbindlist(current_table_list)
+    stopifnot(length(table_list) == occ_n)
+    stopifnot(!any(sapply(table_list, is.null)))
+    out_data_table <- rbindlist(table_list)
     fwrite(out_data_table, file = out)
 }
 

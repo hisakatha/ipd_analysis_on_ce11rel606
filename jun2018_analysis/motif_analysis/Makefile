@@ -5,15 +5,28 @@ SHELL := bash
 motif_dirs := ACATMTGG ACGCRTG AGGCTT_4 AGGY_7 ATCAGCTG ATWTTB CGRAACCCG CTGDAR CTGRAA GAGD GATC GCGC GGN_10 GGN_4 GGTCTCGC GKCGGY GTAS HKGAGCA HRGTA RGTA RGTAB RTAB TACTGTAG TATAA TTTT YGGWR
 tandem_dirs := tandem_repeat_s4_01down tandem_repeat_s4_01up tandem_repeat_s4_02down tandem_repeat_s4_02up tandem_repeat_s4_03down tandem_repeat_s4_03up \
 	tandem_repeat_s4_04down tandem_repeat_s4_04up tandem_repeat_s4_05down tandem_repeat_s4_05up
-all_dirs := $(motif_dirs) $(tandem_dirs)
+motif_dirs2 := AAAABT AATMAATA ADNRATWAGWANWH AGACGCAG AGAGAGTA AGCTATAT AGGCAGGC ATGGGAYA ATTGTTAC AWBWWTWAAAANWA \
+	CAAACTAC CAGYTG CCAATCAG CGGYTTGA CRACGAS CTKCAA CWHAAAAAAWAAAA \
+	DCGAGACC DGCTTC DHNDATCAGCTGATSD DNKAMCAGSTGKYMNN \
+	GAAGGATC GATATRGY GCCVCGCC GCGACCTA GCGCGCGC GCGCGTCA GGHGGY GTAGATCA GTATCGTA GTGTGTGY \
+	HSDAACAKCTGTCHHW KVGACAGCTGTCRDVV MRWWNCACCTGCTNDNN \
+	NBMAACATMTGGTNKM NBNAATATAAWVHT NDNGRCACGTGTCNNND NDRHYACGCRTGKYHND NMDAACAGCTGTYNHN NNAACABCTGTCVNNA NNDACCACGTGGTYND \
+	RKRCGCGTGTCCCWN RNGRCGCGTGTCCYND RNMVCASCTGBGBCMT \
+	TACCCCKA TACCTTGA TGACGTCA TGGTGSA TNDRSCACGTGSBANN \
+	VRKRMCACCTGCTNVHH WAYYAWATWTRKVV WHWAATAAAACNVW WNAHGGCACGTGYCNDA WNDATCACGTGAYHWDN YBKRVARWAAADWG YGGAR
+motif_dirs3 := AGAA ASAAD GAGG BGAGG
+motif_2mer := AA AC AG AT CA CC CG CT GA GC GG GT TA TC TG TT
+#all_dirs := $(motif_dirs) $(tandem_dirs) $(motif_dirs2) $(motif_dirs3)
+all_dirs := $(motif_dirs) $(motif_dirs2) $(motif_dirs3)
 
 all: $(all_dirs)
-motif: $(motif_dirs)
+motif: $(motif_dirs) $(motif_dirs2)
 tandem: $(tandem_dirs)
+two_mers: $(motif_2mer)
 
-.PHONY: all motif tandem $(all_dirs)
+.PHONY: all motif tandem $(all_dirs) $(motif_2mer)
 
-$(motif_dirs):
+$(motif_dirs) $(motif_dirs2) $(motif_dirs3) $(motif_2mer):
 	ln -sf ../Makefile.motif $@/Makefile
 	$(MAKE) -C $@ occ_prefix=$$(cat $@/PATTERN)
 
