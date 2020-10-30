@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:SubreadSet CreatedAt="2018-11-14T15:48:38" MetaType="PacBio.DataSet.SubreadSet" Name="pacbio_dataset_subreadset-181114_064826780" Tags="" TimeStampedName="pacbio_dataset_subreadset-181114_064826780" UniqueId="1e87c0c6-d7b9-72be-6257-c7958f495f31" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-181114_064826776" UniqueId="f732b0da-d87c-4279-b9ca-00ee70029a39">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064826777" UniqueId="b0e6eb09-c670-49dc-9e9a-8ac24cc7ece8"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-181114_064826627" UniqueId="cea7f0c2-b71b-4784-9fb5-908100e5b350">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064826777" UniqueId="f19f5f3c-a175-4c5a-ad06-7a3653da6483"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.AdapterFastaFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.adapters.fasta" TimeStampedName="pacbio_subreadfile_adapterfastafile-181114_064826636" UniqueId="d5424cb4-d9e5-4d4c-a1a5-83f18f9c4f6e"/>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/data2/ce-pacbio-may2018/L/1_A01/m54133_180619_233117.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-181114_064826775" UniqueId="4e71cb2b-a62b-4316-bb22-862fcf74b355">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/L/1_A01/m54133_180619_233117.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064826776" UniqueId="822e7497-0dde-4257-941c-3ce40a1db942"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/data2/ce-pacbio-may2018/L/1_A01/m54133_180619_233117.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-181114_064826758" UniqueId="7b6c1356-1c3e-4e5a-b636-a35b63010de8">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/L/1_A01/m54133_180619_233117.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064826776" UniqueId="3f6619b7-5a22-4013-8243-b021a866ba36"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.AdapterFastaFile" ResourceId="/data2/ce-pacbio-may2018/L/1_A01/m54133_180619_233117.adapters.fasta" TimeStampedName="pacbio_subreadfile_adapterfastafile-181114_064826775" UniqueId="96d40d9d-b3be-4656-af6e-e01df78f85fa"/>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>24240892702</pbds:TotalLength>
+		<pbds:NumRecords>17713219</pbds:NumRecords>
+	</pbds:DataSetMetadata>
+</pbds:SubreadSet>

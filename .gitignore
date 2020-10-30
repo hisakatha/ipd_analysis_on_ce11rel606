@@ -23,6 +23,25 @@
 !PD2182-sequel
 !PD2182-sequel/**/
 
+!jun2018_abcd_pcr_no_chunk
+!jun2018_abcd_pcr_no_chunk/**/
+!jun2018_ab_pcr_vc2010_op50_no_chunk
+!jun2018_ab_pcr_vc2010_op50_no_chunk/**/
+!jun2018_analysis_high_mapq
+!jun2018_analysis_high_mapq/**/
+!jun2018_cd_pcr_vc2010_no_chunk
+!jun2018_cd_pcr_vc2010_no_chunk/**/
+!jun2018_kl_nopcr_no_chunk
+!jun2018_kl_nopcr_no_chunk/**/
+!jun2018_k_nopcr_vc2010_op50_no_chunk
+!jun2018_k_nopcr_vc2010_op50_no_chunk/**/
+!jun2018_l_nopcr_vc2010_no_chunk
+!jun2018_l_nopcr_vc2010_no_chunk/**/
+!PD2182-20150119_no_chunk
+!PD2182-20150119_no_chunk/**/
+!PD2182-sequel_no_chunk
+!PD2182-sequel_no_chunk/**/
+
 test_dataset
 
 !*.sh

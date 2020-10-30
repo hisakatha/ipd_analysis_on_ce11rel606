@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+Rscript get_count.plot.R log2ipd_count_coverage25.ab_celegans.csv "IPD distribution in C. elegans of VC2010+OP50/WGA"
+Rscript get_count.plot.R log2ipd_count_coverage25.cd_celegans.csv "IPD distribution in C. elegans of VC2010/WGA"
+Rscript get_count.plot.R log2ipd_count_coverage25.k_celegans.csv "IPD distribution in C. elegans of VC2010+OP50/native"
+Rscript get_count.plot.R log2ipd_count_coverage25.l_celegans.csv "IPD distribution in C. elegans of VC2010/native"
+Rscript get_count.plot.R log2ipd_count_coverage25.PD2182sequel_celegans.csv "IPD distribution in C. elegans of PD2182/native"
+Rscript get_count.plot.R log2ipd_count_coverage25.ab_ecoli.csv "IPD distribution in E. coli of VC2010+OP50/WGA"
+Rscript get_count.plot.R log2ipd_count_coverage25.cd_ecoli.csv "IPD distribution in E. coli of VC2010/WGA"
+Rscript get_count.plot.R log2ipd_count_coverage25.k_ecoli.csv "IPD distribution in E. coli of VC2010+OP50/native"
+Rscript get_count.plot.R log2ipd_count_coverage25.l_ecoli.csv "IPD distribution in E. coli of VC2010/native"
+Rscript get_count.plot.R log2ipd_count_coverage25.PD2182sequel_ecoli.csv "IPD distribution in E. coli of PD2182/native"

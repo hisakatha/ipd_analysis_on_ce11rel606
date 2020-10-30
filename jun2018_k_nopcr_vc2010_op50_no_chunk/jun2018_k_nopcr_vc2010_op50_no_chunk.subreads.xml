@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:SubreadSet CreatedAt="2018-11-14T15:49:58" MetaType="PacBio.DataSet.SubreadSet" Name="pacbio_dataset_subreadset-181114_064952800" Tags="" TimeStampedName="pacbio_dataset_subreadset-181114_064952800" UniqueId="64c1ed99-2f43-ec45-d89b-2198a7165a60" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-181114_064952798" UniqueId="94a8f5b5-99f5-41e4-b892-99aaf7e9c83c">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064952798" UniqueId="375e0c88-35db-4e81-833f-8f8d62b65d82"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-181114_064952796" UniqueId="3d44f209-b5f1-449b-895e-bcd4bfbed8af">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-181114_064952798" UniqueId="c353d2fa-085d-415e-8007-5d4612c83934"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.AdapterFastaFile" ResourceId="/data2/ce-pacbio-may2018/K/1_A01/m54133_180610_234809.adapters.fasta" TimeStampedName="pacbio_subreadfile_adapterfastafile-181114_064952797" UniqueId="358ea367-f401-47ac-aff6-ed93f4993417"/>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>11773283167</pbds:TotalLength>
+		<pbds:NumRecords>8653571</pbds:NumRecords>
+	</pbds:DataSetMetadata>
+</pbds:SubreadSet>

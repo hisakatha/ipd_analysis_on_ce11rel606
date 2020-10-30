@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbds:SubreadSet CreatedAt="2019-07-25T03:04:58" MetaType="PacBio.DataSet.SubreadSet" Name="pacbio_dataset_subreadset-190724_180458130" Tags="" TimeStampedName="pacbio_dataset_subreadset-190724_180458130" UniqueId="b53323dc-242a-65db-a745-070c3c86947b" Version="3.0.1" xmlns:pbbase="http://pacificbiosciences.com/PacBioBaseDataModel.xsd" xmlns:pbds="http://pacificbiosciences.com/PacBioDatasets.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pacificbiosciences.com/PacBioDataModel.xsd">
+	<pbbase:ExternalResources>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_113454_42172_c100745572550000001823159107071580_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458122" UniqueId="8626fbe3-4eaf-43df-b5a2-09b0ac3506e2">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_113454_42172_c100745572550000001823159107071580_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458122" UniqueId="ef9da874-ddfc-444e-9783-1e287956fa38"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_113454_42172_c100745572550000001823159107071580_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180456343" UniqueId="6722c1c8-3385-44ae-b7fe-d0428f0f91dc">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_113454_42172_c100745572550000001823159107071580_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458122" UniqueId="5672c181-8ad1-4679-b109-64e25060b568"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_155557_42172_c100745572550000001823159107071581_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458122" UniqueId="8867d4b5-388b-4980-9f7b-7ad892788f18">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_155557_42172_c100745572550000001823159107071581_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458122" UniqueId="06ba0bd2-ed09-4ae3-869c-488aafcc43da"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_155557_42172_c100745572550000001823159107071581_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180456385" UniqueId="ea61da27-06a7-4622-80d8-306727b96f8c">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_155557_42172_c100745572550000001823159107071581_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458122" UniqueId="7a3ac007-8a0c-44f9-ad7c-23e1ef3c9558"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_201721_42172_c100745572550000001823159107071582_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458121" UniqueId="26f7b2bb-ad7b-4c3d-8140-9b9736d72bd8">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_201721_42172_c100745572550000001823159107071582_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458122" UniqueId="b2147623-3016-4589-83d4-940ab55ea541"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_201721_42172_c100745572550000001823159107071582_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180456428" UniqueId="ec01e85d-9d40-46b4-ae99-6eb41fa3e56e">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150119_201721_42172_c100745572550000001823159107071582_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458121" UniqueId="9a6bae68-d634-4de6-97d6-4c59b83d8cc2"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_003842_42172_c100745572550000001823159107071583_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458121" UniqueId="c0a34e31-112e-4e23-97be-f59fe165af51">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_003842_42172_c100745572550000001823159107071583_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458121" UniqueId="0a39dca8-cdd8-4877-a140-9b6dc36a8014"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_003842_42172_c100745572550000001823159107071583_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180456469" UniqueId="d8fa7640-a028-4fe0-bc5e-e04427323a36">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_003842_42172_c100745572550000001823159107071583_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458121" UniqueId="c4a760aa-c024-4606-aae0-f8a7a91329eb"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_050000_42172_c100745572550000001823159107071584_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458120" UniqueId="7754b00e-616f-4b9a-98d6-750874ceb870">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_050000_42172_c100745572550000001823159107071584_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458121" UniqueId="e44e8205-809e-49fd-93f2-baee69418c31"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_050000_42172_c100745572550000001823159107071584_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180456979" UniqueId="fc73e51c-0dd2-4c6f-98f5-1c6c2e6820bb">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_050000_42172_c100745572550000001823159107071584_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458121" UniqueId="cdb9fa9f-caac-4728-a5a9-b88882589074"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_092108_42172_c100745572550000001823159107071585_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458120" UniqueId="cfc13cbc-893d-4324-ae2f-bbe325c701c7">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_092108_42172_c100745572550000001823159107071585_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="b4e733cb-1bac-4893-9f18-6550931178aa"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_092108_42172_c100745572550000001823159107071585_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180457210" UniqueId="a4ad46c6-64ae-46d2-97c2-e372bbf3752a">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_092108_42172_c100745572550000001823159107071585_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="82495fd7-6d66-4bd7-889e-351e3ed85e0f"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_134519_42172_c100745572550000001823159107071586_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458120" UniqueId="ebd9334f-b38c-474a-b849-780699aaa701">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_134519_42172_c100745572550000001823159107071586_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="96356f7e-8bd7-4165-9c2b-46dc9b4934d6"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_134519_42172_c100745572550000001823159107071586_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180457647" UniqueId="cdc0b2a4-8c19-4bd0-931e-4482c142432a">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_134519_42172_c100745572550000001823159107071586_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="1bd734df-be4f-4613-8b3a-be54a7e9b1db"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+		<pbbase:ExternalResource MetaType="PacBio.SubreadFile.SubreadBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_180614_42172_c100745572550000001823159107071587_s1_p0.subreads.bam" TimeStampedName="pacbio_subreadfile_subreadbamfile-190724_180458119" UniqueId="31fc8c4e-3ec8-4515-b85b-4dd942d475b0">
+			<pbbase:FileIndices>
+				<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_180614_42172_c100745572550000001823159107071587_s1_p0.subreads.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="f82c4b8b-3a92-4725-a9d9-f07965611b60"/>
+			</pbbase:FileIndices>
+			<pbbase:ExternalResources>
+				<pbbase:ExternalResource MetaType="PacBio.SubreadFile.ScrapsBamFile" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_180614_42172_c100745572550000001823159107071587_s1_p0.scraps.bam" TimeStampedName="pacbio_subreadfile_scrapsbamfile-190724_180458118" UniqueId="7532d2f2-ef72-41ea-a5bb-d63f9798106e">
+					<pbbase:FileIndices>
+						<pbbase:FileIndex MetaType="PacBio.Index.PacBioIndex" ResourceId="/home/hisakatha/glusterfs/PD2182-20150119_subreads_bam/m150120_180614_42172_c100745572550000001823159107071587_s1_p0.scraps.bam.pbi" TimeStampedName="pacbio_index_pacbioindex-190724_180458120" UniqueId="5bbf7d6c-7ab5-424f-bbed-d3350345911b"/>
+					</pbbase:FileIndices>
+				</pbbase:ExternalResource>
+			</pbbase:ExternalResources>
+		</pbbase:ExternalResource>
+	</pbbase:ExternalResources>
+	<pbds:DataSetMetadata>
+		<pbds:TotalLength>3361102488</pbds:TotalLength>
+		<pbds:NumRecords>419336</pbds:NumRecords>
+	</pbds:DataSetMetadata>
+</pbds:SubreadSet>
