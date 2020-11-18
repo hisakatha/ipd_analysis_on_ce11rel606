@@ -125,7 +125,9 @@ get_values_per_base <- function(data){
 }
 
 source("../load_jun2018_data.saved.fst.ab_cd_k_l.R", chdir = TRUE)
-#source("../load_and_save_PD2182_data.saved.fst.PD2182.R", chdir = TRUE)
+source("../load_jun2018_data.saved.fst.abcd.R", chdir = TRUE)
+source("../load_jun2018_data.saved.fst.kl.R", chdir = TRUE)
+source("../load_and_save_PD2182_data.saved.fst.PD2182.R", chdir = TRUE)
 source("../load_and_save_PD2182sequel_data.saved.fst.PD2182sequel.R", chdir = TRUE)
 
 coverage_thres <- 25
@@ -134,18 +136,18 @@ ab_data_deep_celegans <- ab_data[coverage >= coverage_thres & refName != ecoli_c
 cd_data_deep_celegans <- cd_data[coverage >= coverage_thres & refName != ecoli_chr]
 k_data_deep_celegans <- k_data[coverage >= coverage_thres & refName != ecoli_chr]
 l_data_deep_celegans <- l_data[coverage >= coverage_thres & refName != ecoli_chr]
-#abcd_data_deep_celegans <- abcd_data[coverage >= coverage_thres & refName != ecoli_chr]
-#kl_data_deep_celegans <- kl_data[coverage >= coverage_thres & refName != ecoli_chr]
-#PD2182_data_deep_celegans <- PD2182_data[coverage >= coverage_thres & refName != ecoli_chr]
+abcd_data_deep_celegans <- abcd_data[coverage >= coverage_thres & refName != ecoli_chr]
+kl_data_deep_celegans <- kl_data[coverage >= coverage_thres & refName != ecoli_chr]
+PD2182_data_deep_celegans <- PD2182_data[coverage >= coverage_thres & refName != ecoli_chr]
 PD2182sequel_data_deep_celegans <- PD2182sequel_data[coverage >= coverage_thres & refName != ecoli_chr]
 
 ab_data_deep_ecoli <- ab_data[coverage >= coverage_thres & refName == ecoli_chr]
 cd_data_deep_ecoli <- cd_data[coverage >= coverage_thres & refName == ecoli_chr]
 k_data_deep_ecoli <- k_data[coverage >= coverage_thres & refName == ecoli_chr]
 l_data_deep_ecoli <- l_data[coverage >= coverage_thres & refName == ecoli_chr]
-#abcd_data_deep_ecoli <- abcd_data[coverage >= coverage_thres & refName == ecoli_chr]
-#kl_data_deep_ecoli <- kl_data[coverage >= coverage_thres & refName == ecoli_chr]
-#PD2182_data_deep_ecoli <- PD2182_data[coverage >= coverage_thres & refName == ecoli_chr]
+abcd_data_deep_ecoli <- abcd_data[coverage >= coverage_thres & refName == ecoli_chr]
+kl_data_deep_ecoli <- kl_data[coverage >= coverage_thres & refName == ecoli_chr]
+PD2182_data_deep_ecoli <- PD2182_data[coverage >= coverage_thres & refName == ecoli_chr]
 PD2182sequel_data_deep_ecoli <- PD2182sequel_data[coverage >= coverage_thres & refName == ecoli_chr]
 
 #cat("Start processing get_values_per_base for C. elegans\n")
@@ -182,11 +184,11 @@ outside_length <- 20
 
 foreach_ret <- foreach(i = 1:length(subset1_motifs)) %do% {
     motif_dir <- subset1_motifs[i]
-    output <- sprintf("motif_kinetics_statistical_tests.rank_sum.celegans_vs_ecoli.subset1.%s.csv", motif_dir)
-    invisible(file.remove(output))
-    print_header <- TRUE
     target_position <- subset1_positions[i] + outside_length
     target_strand <- subset1_strand[i]
+    output <- sprintf("motif_kinetics_statistical_tests.rank_sum.celegans_vs_ecoli.subset1.%s_%d_%d.csv", motif_dir, target_position, ifelse(target_strand == "+", 0, 1))
+    invisible(file.remove(output))
+    print_header <- TRUE
     cat(sprintf("Start processing motif %s\n", motif_dir))
     ab_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.c_elegans.csv"))[position == target_position & strand == target_strand]
     ab_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.e_coli.csv"))[position == target_position & strand == target_strand]
@@ -198,8 +200,9 @@ foreach_ret <- foreach(i = 1:length(subset1_motifs)) %do% {
     cd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.cd.e_coli.csv"))[position == target_position & strand == target_strand]
     test_motif_kinetics(cd_ipd, cd_ecoli_ipd, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), outside_length, "cd_deep_celegans", "VC2010/WGA/C. elegans", "cd_deep_ecoli", "VC2010/WGA/E. coli", "IPD", output, print_header)
     
-    #PD2182_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182.c_elegans.csv"))[position == target_position & strand == target_strand]
-    #PD2182_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182.e_coli.csv"))[position == target_position & strand == target_strand]
+    PD2182_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182.c_elegans.csv"))[position == target_position & strand == target_strand]
+    PD2182_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182.e_coli.csv"))[position == target_position & strand == target_strand]
+    test_motif_kinetics(PD2182_ipd, PD2182_ecoli_ipd, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), outside_length, "PD2182_deep_celegans", "PD2182 (RS II)/native/C. elegans", "PD2182_deep_ecoli", "PD2182 (RS II)/native/E. coli", "IPD", output, print_header)
     
     PD2182sequel_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182sequel.c_elegans.csv"))[position == target_position & strand == target_strand]
     PD2182sequel_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182sequel.e_coli.csv"))[position == target_position & strand == target_strand]
@@ -213,6 +216,13 @@ foreach_ret <- foreach(i = 1:length(subset1_motifs)) %do% {
     l_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.l.e_coli.csv"))[position == target_position & strand == target_strand]
     test_motif_kinetics(l_ipd, l_ecoli_ipd, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), outside_length, "l_deep_celegans", "VC2010/native/C. elegans", "l_deep_ecoli", "VC2010/native/E. coli", "IPD", output, print_header)
     
+    abcd_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.c_elegans.csv"))[position == target_position & strand == target_strand]
+    abcd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.e_coli.csv"))[position == target_position & strand == target_strand]
+    test_motif_kinetics(abcd_ipd, abcd_ecoli_ipd, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), outside_length, "abcd_deep_celegans", "Merged/WGA/C. elegans", "abcd_deep_ecoli", "Merged/WGA/E. coli", "IPD", output, print_header)
+    
+    kl_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.c_elegans.csv"))[position == target_position & strand == target_strand]
+    kl_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.e_coli.csv"))[position == target_position & strand == target_strand]
+    test_motif_kinetics(kl_ipd, kl_ecoli_ipd, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), outside_length, "kl_deep_celegans", "Merged/native/C. elegans", "kl_deep_ecoli", "Merged/native/E. coli", "IPD", output, print_header)
     fread(output)
 }
 
