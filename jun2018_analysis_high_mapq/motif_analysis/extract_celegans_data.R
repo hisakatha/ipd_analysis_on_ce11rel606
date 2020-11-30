@@ -16,6 +16,7 @@ if (ncol(occ) == 0) {
     occ <- data.table(chr=character(0), start=integer(0), strand=character(0))
 }
 
-src.celegans <- occ[chr != chr.ecoli, .I]
+occ[, "index" := .(.I)]
+src.celegans <- occ[chr != chr.ecoli, index]
 data.celegans <- data[src %in% src.celegans]
 fwrite(data.celegans, file = out.path)
