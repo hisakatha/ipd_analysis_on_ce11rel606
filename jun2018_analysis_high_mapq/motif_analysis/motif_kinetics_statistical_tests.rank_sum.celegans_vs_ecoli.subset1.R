@@ -81,9 +81,9 @@ motif_titles <- list("AGGCTT_4" = "(AGGCTT)4", "AGGY_7" = "(AGGY)7", "GGN_10" = 
 motif_strings <- list("AGGCTT_4" = "AGGCTTAGGCTTAGGCTTAGGCTT", "AGGY_7" = "AGGYAGGYAGGYAGGYAGGYAGGYAGGY", "GGN_10" = "GGNGGNGGNGGNGGNGGNGGNGGNGGNGGN", "GGN_4" = "GGNGGNGGNGGN")
 
 
-subset1_motifs <- c("GATC", "GNNGATC", "TGANNNNNNNNTGCT", "TGANNNNNNNNTGCT", "AATT", "CTAG")
-subset1_positions <- c(2, 5, 3, 12, 2, 1)
-subset1_strand <- c("+", "+", "+", "-", "+", "+")
+subset1_motifs <- c("GATC", "GNNGATC", "TGANNNNNNNNTGCT", "TGANNNNNNNNTGCT", "AATT", "CTAG", "ATGCAT")
+subset1_positions <- c(2, 5, 3, 12, 2, 1, 5)
+subset1_strand <- c("+", "+", "+", "-", "+", "+", "+")
 
 stopifnot(length(subset1_motifs) == length(subset1_positions))
 
