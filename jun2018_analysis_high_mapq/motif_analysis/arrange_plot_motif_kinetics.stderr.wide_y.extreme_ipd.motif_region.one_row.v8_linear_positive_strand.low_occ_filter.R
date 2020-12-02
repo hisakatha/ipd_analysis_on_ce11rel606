@@ -26,9 +26,15 @@ get_integer_breaks <- function(values) {
     return(seq(min_values + (fixed_point - min_values) %% step, max_values, by = step))
 }
 
+correlation_output_prefix <- "arrange_plot_motif_kinetics.stderr.wide_y.extreme_ipd.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.correlation"
+correlation_output1 <- paste0(correlation_output_prefix, ".observed_vs_estimate.csv")
+correlation_output2 <- paste0(correlation_output_prefix, ".two_sets.csv")
+invisible(file.remove(correlation_output1))
+invisible(file.remove(correlation_output2))
+
 plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sample_name, ylab_text, global_mean, global_var, global_size){
-    kinetics_occ <- ifelse(kinetics[, .N] == 0, 0, kinetics[strand == "+", max(src)])
-    estimate_occ <- ifelse(estimate[, .N] == 0, 0, estimate[strand == "+", max(src)])
+    kinetics_occ <- ifelse(kinetics[, .N] == 0, 0, kinetics[strand == "+", length(unique(src))])
+    estimate_occ <- ifelse(estimate[, .N] == 0, 0, estimate[strand == "+", length(unique(src))])
     occ_threshold <- 3
     if (kinetics_occ < occ_threshold | estimate_occ < occ_threshold) {
         g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
@@ -94,18 +100,17 @@ plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sa
         #scale_x_continuous(breaks = 1:kinetics_summary[,max(position)], labels = kinetics_summary$label)
     annot_x_rate <- 0.7
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g1_ret <- g1 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    #g1_ret <- g1 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    g1_ret <- g1
     # g1_outside20
     end_pos <- kinetics[, max(position)] - 20
     annot_x <- quantile(c(kinetics_summary[, min(position)], kinetics_summary[, max(position)]), annot_x_rate, names = FALSE)
     g1_outside20 <- g1 %+% kinetics_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g1_outside10
     plot_data <- kinetics_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g1_outside10 <- g1 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    g1_outside10 <- g1 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     # g2
     plot_data <- merged_summary[region == "Motif"]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
@@ -122,24 +127,24 @@ plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sa
         labs(color = "Data source") +
         coord_cartesian(ylim = c(ylim_lower, ylim_upper)) +
         scale_colour_brewer(palette = "Set1", limits = c("observed", "estimated"), labels = c("observed", "estimated"), drop = FALSE)
-    g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    #g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    fwrite(data.table(motif_string = title_text, sample_name = sample_name, mean_cor = mean_cor, mean_cor_p = mean_cor_p, kinetics_occ = kinetics_occ), file = correlation_output1, append = TRUE)
+    g2_ret <- g2
     # g2_outside20
     annot_x <- quantile(c(merged_summary[, min(position)], merged_summary[, max(position)]), annot_x_rate, names = FALSE)
     g2_outside20 <- g2 %+% merged_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g2_outside10
     plot_data <- merged_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     return(list("ipd" = g1_ret, "ipd_and_estimate" = g2_ret, "ipd_outside20" = g1_outside20, "ipd_outside10" = g1_outside10,
                 "ipd_and_estimate_outside20" = g2_outside20, "ipd_and_estimate_outside10" = g2_outside10))
 }
 
 plot_motif_kinetics_comparison <- function(kinetics1, kinetics2, type1, type2, title_text, motif_string, sample_name, ylab_text, global_mean, global_var, global_size){
-    kinetics1_occ <- ifelse(kinetics1[, .N] == 0, 0, kinetics1[strand == "+", max(src)])
-    kinetics2_occ <- ifelse(kinetics2[, .N] == 0, 0, kinetics2[strand == "+", max(src)])
+    kinetics1_occ <- ifelse(kinetics1[, .N] == 0, 0, kinetics1[strand == "+", length(unique(src))])
+    kinetics2_occ <- ifelse(kinetics2[, .N] == 0, 0, kinetics2[strand == "+", length(unique(src))])
     occ_threshold <- 3
     if (kinetics1_occ < occ_threshold & kinetics2_occ < occ_threshold) {
         g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
@@ -212,18 +217,18 @@ plot_motif_kinetics_comparison <- function(kinetics1, kinetics2, type1, type2, t
         coord_cartesian(ylim = c(ylim_lower, ylim_upper)) +
         scale_colour_brewer(palette = "Set1", limits = c(type1, type2), labels = c(type1, type2), drop = FALSE)
         #scale_x_continuous(breaks = get_integer_breaks(plot_data[, position])) +
-    g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    #g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    fwrite(data.table(motif_string = title_text, sample_name = sample_name, mean_cor = mean_cor, mean_cor_p = mean_cor_p, type1 = type1, kinetics1_occ = kinetics1_occ, type2 = type2, kinetics2_occ = kinetics2_occ), file = correlation_output2, append = TRUE)
+    g2_ret <- g2
     # g2_outside20
     annot_x <- quantile(c(merged_summary[, min(position)], merged_summary[, max(position)]), annot_x_rate, names = FALSE)
     end_pos <- max(kinetics1[, position], kinetics2[, position]) - 20
     g2_outside20 <- g2 %+% merged_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g2_outside10
     plot_data <- merged_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     return(list("comparison" = g2_ret, "comparison_outside20" = g2_outside20, "comparison_outside10" = g2_outside10))
 }
 
@@ -289,6 +294,12 @@ N_k_deep_IPD_size <- 132281513
 N_l_deep_IPD_mean <- 1.00898633147954
 N_l_deep_IPD_var <- 0.453772
 N_l_deep_IPD_size <- 138935492
+N_abcd_deep_IPD_mean <- 1.00256291861053
+N_abcd_deep_IPD_var <- 0.48004
+N_abcd_deep_IPD_size <- 61748820
+N_kl_deep_IPD_mean <- 1.00412118937343
+N_kl_deep_IPD_var <- 0.403984
+N_kl_deep_IPD_size <- 187204127
 N_PD2182_deep_IPD_mean <- 1.02215998241509
 N_PD2182_deep_IPD_var <- 0.551352
 N_PD2182_deep_IPD_size <- 1223970
@@ -301,31 +312,43 @@ cd_plots <- list()
 PD2182sequel_plots <- list()
 k_plots <- list()
 l_plots <- list()
+abcd_plots <- list()
+kl_plots <- list()
 ab_plots_with_estimate <- list()
 cd_plots_with_estimate <- list()
 PD2182sequel_plots_with_estimate <- list()
 k_plots_with_estimate <- list()
 l_plots_with_estimate <- list()
+abcd_plots_with_estimate <- list()
+kl_plots_with_estimate <- list()
 ab_plots_outside20 <- list()
 cd_plots_outside20 <- list()
 PD2182sequel_plots_outside20 <- list()
 k_plots_outside20 <- list()
 l_plots_outside20 <- list()
+abcd_plots_outside20 <- list()
+kl_plots_outside20 <- list()
 ab_plots_outside10 <- list()
 cd_plots_outside10 <- list()
 PD2182sequel_plots_outside10 <- list()
 k_plots_outside10 <- list()
 l_plots_outside10 <- list()
+abcd_plots_outside10 <- list()
+kl_plots_outside10 <- list()
 ab_plots_with_estimate_outside20 <- list()
 cd_plots_with_estimate_outside20 <- list()
 PD2182sequel_plots_with_estimate_outside20 <- list()
 k_plots_with_estimate_outside20 <- list()
 l_plots_with_estimate_outside20 <- list()
+abcd_plots_with_estimate_outside20 <- list()
+kl_plots_with_estimate_outside20 <- list()
 ab_plots_with_estimate_outside10 <- list()
 cd_plots_with_estimate_outside10 <- list()
 PD2182sequel_plots_with_estimate_outside10 <- list()
 k_plots_with_estimate_outside10 <- list()
 l_plots_with_estimate_outside10 <- list()
+abcd_plots_with_estimate_outside10 <- list()
+kl_plots_with_estimate_outside10 <- list()
 ab_ecoli_plots <- list()
 ab_ecoli_plots_with_estimate <- list()
 ab_ecoli_plots_outside20 <- list()
@@ -356,6 +379,18 @@ PD2182sequel_ecoli_plots_outside20 <- list()
 PD2182sequel_ecoli_plots_outside10 <- list()
 PD2182sequel_ecoli_plots_with_estimate_outside20 <- list()
 PD2182sequel_ecoli_plots_with_estimate_outside10 <- list()
+abcd_ecoli_plots <- list()
+abcd_ecoli_plots_with_estimate <- list()
+abcd_ecoli_plots_outside20 <- list()
+abcd_ecoli_plots_outside10 <- list()
+abcd_ecoli_plots_with_estimate_outside20 <- list()
+abcd_ecoli_plots_with_estimate_outside10 <- list()
+kl_ecoli_plots <- list()
+kl_ecoli_plots_with_estimate <- list()
+kl_ecoli_plots_outside20 <- list()
+kl_ecoli_plots_outside10 <- list()
+kl_ecoli_plots_with_estimate_outside20 <- list()
+kl_ecoli_plots_with_estimate_outside10 <- list()
 # Comparison of C. elegans IPDs and E. coli IPDs
 ab_comparison_plots <- list()
 ab_comparison_plots_outside20 <- list()
@@ -372,6 +407,12 @@ l_comparison_plots_outside10 <- list()
 PD2182sequel_comparison_plots <- list()
 PD2182sequel_comparison_plots_outside20 <- list()
 PD2182sequel_comparison_plots_outside10 <- list()
+abcd_comparison_plots <- list()
+abcd_comparison_plots_outside20 <- list()
+abcd_comparison_plots_outside10 <- list()
+kl_comparison_plots <- list()
+kl_comparison_plots_outside20 <- list()
+kl_comparison_plots_outside10 <- list()
 # Comparison of C. elegans WGA and native
 ab_k_comparison_plots <- list()
 ab_k_comparison_plots_outside20 <- list()
@@ -382,6 +423,9 @@ cd_l_comparison_plots_outside10 <- list()
 null_PD2182sequel_comparison_plots <- list()
 null_PD2182sequel_comparison_plots_outside20 <- list()
 null_PD2182sequel_comparison_plots_outside10 <- list()
+abcd_kl_comparison_plots <- list()
+abcd_kl_comparison_plots_outside20 <- list()
+abcd_kl_comparison_plots_outside10 <- list()
 
 legend_plot <- NULL
 legend_plot_with_estimate <- NULL
@@ -450,6 +494,26 @@ for (motif_dir in motif_dirs) {
     l_plots_with_estimate_outside20[[motif_dir]] <- l_plots_tmp[["ipd_and_estimate_outside20"]]
     l_plots_with_estimate_outside10[[motif_dir]] <- l_plots_tmp[["ipd_and_estimate_outside10"]]
     
+    abcd_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.c_elegans.csv"))
+    abcd_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.abcd.c_elegans.csv"))
+    abcd_plots_tmp <- plot_motif_kinetics(abcd_ipd, abcd_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA\n/C. elegans", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_plots[[motif_dir]] <- abcd_plots_tmp[["ipd"]]
+    abcd_plots_with_estimate[[motif_dir]] <- abcd_plots_tmp[["ipd_and_estimate"]]
+    abcd_plots_outside20[[motif_dir]] <- abcd_plots_tmp[["ipd_outside20"]]
+    abcd_plots_outside10[[motif_dir]] <- abcd_plots_tmp[["ipd_outside10"]]
+    abcd_plots_with_estimate_outside20[[motif_dir]] <- abcd_plots_tmp[["ipd_and_estimate_outside20"]]
+    abcd_plots_with_estimate_outside10[[motif_dir]] <- abcd_plots_tmp[["ipd_and_estimate_outside10"]]
+
+    kl_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.c_elegans.csv"))
+    kl_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.kl.c_elegans.csv"))
+    kl_plots_tmp <- plot_motif_kinetics(kl_ipd, kl_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native\n/C. elegans", ylab_expr, N_kl_deep_IPD_mean, N_kl_deep_IPD_var, N_kl_deep_IPD_size)
+    kl_plots[[motif_dir]] <- kl_plots_tmp[["ipd"]]
+    kl_plots_with_estimate[[motif_dir]] <- kl_plots_tmp[["ipd_and_estimate"]]
+    kl_plots_outside20[[motif_dir]] <- kl_plots_tmp[["ipd_outside20"]]
+    kl_plots_outside10[[motif_dir]] <- kl_plots_tmp[["ipd_outside10"]]
+    kl_plots_with_estimate_outside20[[motif_dir]] <- kl_plots_tmp[["ipd_and_estimate_outside20"]]
+    kl_plots_with_estimate_outside10[[motif_dir]] <- kl_plots_tmp[["ipd_and_estimate_outside10"]]
+
     ab_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.e_coli.csv"))
     ab_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.ab.e_coli.csv"))
     ab_ecoli_plots_tmp <- plot_motif_kinetics(ab_ecoli_ipd, ab_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/WGA\n/E. coli", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
@@ -500,6 +564,26 @@ for (motif_dir in motif_dirs) {
     PD2182sequel_ecoli_plots_with_estimate_outside20[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["ipd_and_estimate_outside20"]]
     PD2182sequel_ecoli_plots_with_estimate_outside10[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["ipd_and_estimate_outside10"]]
 
+    abcd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.e_coli.csv"))
+    abcd_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.abcd.e_coli.csv"))
+    abcd_ecoli_plots_tmp <- plot_motif_kinetics(abcd_ecoli_ipd, abcd_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA\n/E. coli", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_ecoli_plots[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd"]]
+    abcd_ecoli_plots_with_estimate[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd_and_estimate"]]
+    abcd_ecoli_plots_outside20[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd_outside20"]]
+    abcd_ecoli_plots_outside10[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd_outside10"]]
+    abcd_ecoli_plots_with_estimate_outside20[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd_and_estimate_outside20"]]
+    abcd_ecoli_plots_with_estimate_outside10[[motif_dir]] <- abcd_ecoli_plots_tmp[["ipd_and_estimate_outside10"]]
+
+    kl_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.e_coli.csv"))
+    kl_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.kl.e_coli.csv"))
+    kl_ecoli_plots_tmp <- plot_motif_kinetics(kl_ecoli_ipd, kl_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native\n/E. coli", ylab_expr, N_kl_deep_IPD_mean, N_kl_deep_IPD_var, N_kl_deep_IPD_size)
+    kl_ecoli_plots[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd"]]
+    kl_ecoli_plots_with_estimate[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd_and_estimate"]]
+    kl_ecoli_plots_outside20[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd_outside20"]]
+    kl_ecoli_plots_outside10[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd_outside10"]]
+    kl_ecoli_plots_with_estimate_outside20[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd_and_estimate_outside20"]]
+    kl_ecoli_plots_with_estimate_outside10[[motif_dir]] <- kl_ecoli_plots_tmp[["ipd_and_estimate_outside10"]]
+
     type1_text <- "C. elegans"
     type2_text <- "E. coli"
     ab_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, ab_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/WGA", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
@@ -522,6 +606,14 @@ for (motif_dir in motif_dirs) {
     PD2182sequel_comparison_plots[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison"]]
     PD2182sequel_comparison_plots_outside20[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison_outside20"]]
     PD2182sequel_comparison_plots_outside10[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison_outside10"]]
+    abcd_comparison_plots_tmp <- plot_motif_kinetics_comparison(abcd_ipd, abcd_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_comparison_plots[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison"]]
+    abcd_comparison_plots_outside20[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison_outside20"]]
+    abcd_comparison_plots_outside10[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison_outside10"]]
+    kl_comparison_plots_tmp <- plot_motif_kinetics_comparison(kl_ipd, kl_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native", ylab_expr, N_kl_deep_IPD_mean, N_kl_deep_IPD_var, N_kl_deep_IPD_size)
+    kl_comparison_plots[[motif_dir]] <- kl_comparison_plots_tmp[["comparison"]]
+    kl_comparison_plots_outside20[[motif_dir]] <- kl_comparison_plots_tmp[["comparison_outside20"]]
+    kl_comparison_plots_outside10[[motif_dir]] <- kl_comparison_plots_tmp[["comparison_outside10"]]
     if (is.null(legend_plot_comparison)) {
         legend_plot_comparison <- get_legend(ab_comparison_plots_tmp[["comparison"]])
     }
@@ -540,6 +632,10 @@ for (motif_dir in motif_dirs) {
     null_PD2182sequel_comparison_plots[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison"]]
     null_PD2182sequel_comparison_plots_outside20[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison_outside20"]]
     null_PD2182sequel_comparison_plots_outside10[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison_outside10"]]
+    abcd_kl_comparison_plots_tmp <- plot_motif_kinetics_comparison(abcd_ipd, kl_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/C. elegans", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_kl_comparison_plots[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison"]]
+    abcd_kl_comparison_plots_outside20[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside20"]]
+    abcd_kl_comparison_plots_outside10[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside10"]]
     if (is.null(legend_plot_wga_native_comparison)) {
         legend_plot_wga_native_comparison <- get_legend(ab_k_comparison_plots_tmp[["comparison"]])
     }
@@ -550,31 +646,43 @@ cd_plots[["legend"]] <- legend_plot
 PD2182sequel_plots[["legend"]] <- legend_plot
 k_plots[["legend"]] <- legend_plot
 l_plots[["legend"]] <- legend_plot
+abcd_plots[["legend"]] <- legend_plot
+kl_plots[["legend"]] <- legend_plot
 ab_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 cd_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 PD2182sequel_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 k_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 l_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 ab_plots_outside20[["legend"]] <- legend_plot
 cd_plots_outside20[["legend"]] <- legend_plot
 PD2182sequel_plots_outside20[["legend"]] <- legend_plot
 k_plots_outside20[["legend"]] <- legend_plot
 l_plots_outside20[["legend"]] <- legend_plot
+abcd_plots_outside20[["legend"]] <- legend_plot
+kl_plots_outside20[["legend"]] <- legend_plot
 ab_plots_outside10[["legend"]] <- legend_plot
 cd_plots_outside10[["legend"]] <- legend_plot
 PD2182sequel_plots_outside10[["legend"]] <- legend_plot
 k_plots_outside10[["legend"]] <- legend_plot
 l_plots_outside10[["legend"]] <- legend_plot
+abcd_plots_outside10[["legend"]] <- legend_plot
+kl_plots_outside10[["legend"]] <- legend_plot
 ab_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 cd_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 PD2182sequel_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 k_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 l_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 ab_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 cd_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 PD2182sequel_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 k_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 l_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 ab_ecoli_plots[["legend"]] <- legend_plot
 ab_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
 ab_ecoli_plots_outside20[["legend"]] <- legend_plot
@@ -605,6 +713,18 @@ PD2182sequel_ecoli_plots_outside20[["legend"]] <- legend_plot
 PD2182sequel_ecoli_plots_outside10[["legend"]] <- legend_plot
 PD2182sequel_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
 PD2182sequel_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots[["legend"]] <- legend_plot
+abcd_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots_outside20[["legend"]] <- legend_plot
+abcd_ecoli_plots_outside10[["legend"]] <- legend_plot
+abcd_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots[["legend"]] <- legend_plot
+kl_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots_outside20[["legend"]] <- legend_plot
+kl_ecoli_plots_outside10[["legend"]] <- legend_plot
+kl_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
 ab_comparison_plots[["legend"]] <- legend_plot_comparison
 ab_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
 ab_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
@@ -620,6 +740,12 @@ l_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
 PD2182sequel_comparison_plots[["legend"]] <- legend_plot_comparison
 PD2182sequel_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
 PD2182sequel_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+kl_comparison_plots[["legend"]] <- legend_plot_comparison
+kl_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+kl_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
 ab_k_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
 ab_k_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
 ab_k_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
@@ -629,6 +755,9 @@ cd_l_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
 null_PD2182sequel_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
 null_PD2182sequel_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
 null_PD2182sequel_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
 
 # All sample arrangement (C. elegans)
 pdf_width <- 12
@@ -636,7 +765,7 @@ n_motifs_high_ipd <- length(motifs_high_ipd)
 n_motifs_low_ipd <- length(motifs_low_ipd)
 n_motifs_select1 <- length(motifs_select1)
 n_motifs_extreme1 <- length(motifs_extreme1)
-n_sample <- 5
+n_sample <- 7
 ncol2 <- 3
 n_page_high_ipd <- ((n_motifs_high_ipd - 1) %/% ncol2) + 1
 n_page_low_ipd <- ((n_motifs_low_ipd - 1) %/% ncol2) + 1
@@ -651,6 +780,8 @@ p_text_cd <- ggdraw() + draw_label("VC2010/WGA", angle = 90)
 p_text_PD2182sequel <- ggdraw() + draw_label("PD2182 (PacBio Sequel)", angle = 90)
 p_text_k <- ggdraw() + draw_label("VC2010+OP50/native", angle = 90)
 p_text_l <- ggdraw() + draw_label("VC2010/native", angle = 90)
+p_text_abcd <- ggdraw() + draw_label("Merged/WGA", angle = 90)
+p_text_kl <- ggdraw() + draw_label("Merged/native", angle = 90)
 rel_widths2 <- c(0.1, rep(1, ncol2))
 
 pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.all.high.pdf", width = pdf_width, height = pdf_height_high2)
@@ -660,7 +791,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -670,7 +802,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -684,7 +817,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -694,7 +828,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -704,7 +839,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -714,7 +850,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -729,7 +866,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -739,7 +877,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -753,7 +892,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -763,7 +903,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -773,7 +914,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -783,7 +925,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -801,7 +944,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots[p_motifs], list(p_text_cd), cd_comparison_plots[p_motifs],
                list(p_text_k), k_comparison_plots[p_motifs], list(p_text_l), l_comparison_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots[p_motifs], list(p_text_kl), kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -811,7 +955,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots[p_motifs], list(p_text_cd), cd_comparison_plots[p_motifs],
                list(p_text_k), k_comparison_plots[p_motifs], list(p_text_l), l_comparison_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots[p_motifs], list(p_text_kl), kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -821,7 +966,8 @@ for(i in 1:n_page_select1){
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots[p_motifs], list(p_text_cd), cd_comparison_plots[p_motifs],
                list(p_text_k), k_comparison_plots[p_motifs], list(p_text_l), l_comparison_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots[p_motifs], list(p_text_kl), kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -831,7 +977,8 @@ for(i in 1:n_page_extreme1){
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots[p_motifs], list(p_text_cd), cd_comparison_plots[p_motifs],
                list(p_text_k), k_comparison_plots[p_motifs], list(p_text_l), l_comparison_plots[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots[p_motifs], list(p_text_kl), kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -848,7 +995,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside20[p_motifs], list(p_text_cd), cd_comparison_plots_outside20[p_motifs],
                list(p_text_k), k_comparison_plots_outside20[p_motifs], list(p_text_l), l_comparison_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside20[p_motifs], list(p_text_kl), kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -858,7 +1006,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside20[p_motifs], list(p_text_cd), cd_comparison_plots_outside20[p_motifs],
                list(p_text_k), k_comparison_plots_outside20[p_motifs], list(p_text_l), l_comparison_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside20[p_motifs], list(p_text_kl), kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -868,7 +1017,8 @@ for(i in 1:n_page_select1){
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside20[p_motifs], list(p_text_cd), cd_comparison_plots_outside20[p_motifs],
                list(p_text_k), k_comparison_plots_outside20[p_motifs], list(p_text_l), l_comparison_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside20[p_motifs], list(p_text_kl), kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -878,7 +1028,8 @@ for(i in 1:n_page_extreme1){
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside20[p_motifs], list(p_text_cd), cd_comparison_plots_outside20[p_motifs],
                list(p_text_k), k_comparison_plots_outside20[p_motifs], list(p_text_l), l_comparison_plots_outside20[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside20[p_motifs], list(p_text_kl), kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -889,7 +1040,8 @@ for(i in 1:n_page_high_ipd){
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside10[p_motifs], list(p_text_cd), cd_comparison_plots_outside10[p_motifs],
                list(p_text_k), k_comparison_plots_outside10[p_motifs], list(p_text_l), l_comparison_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside10[p_motifs], list(p_text_kl), kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -899,7 +1051,8 @@ for(i in 1:n_page_low_ipd){
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside10[p_motifs], list(p_text_cd), cd_comparison_plots_outside10[p_motifs],
                list(p_text_k), k_comparison_plots_outside10[p_motifs], list(p_text_l), l_comparison_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside10[p_motifs], list(p_text_kl), kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -909,7 +1062,8 @@ for(i in 1:n_page_select1){
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside10[p_motifs], list(p_text_cd), cd_comparison_plots_outside10[p_motifs],
                list(p_text_k), k_comparison_plots_outside10[p_motifs], list(p_text_l), l_comparison_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside10[p_motifs], list(p_text_kl), kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -919,7 +1073,8 @@ for(i in 1:n_page_extreme1){
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab), ab_comparison_plots_outside10[p_motifs], list(p_text_cd), cd_comparison_plots_outside10[p_motifs],
                list(p_text_k), k_comparison_plots_outside10[p_motifs], list(p_text_l), l_comparison_plots_outside10[p_motifs],
-               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs])
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside10[p_motifs], list(p_text_kl), kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -930,7 +1085,7 @@ n_motifs_high_ipd <- length(motifs_high_ipd)
 n_motifs_low_ipd <- length(motifs_low_ipd)
 n_motifs_select1 <- length(motifs_select1)
 n_motifs_extreme1 <- length(motifs_extreme1)
-n_sample <- 9
+n_sample <- 13
 ncol2 <- 3
 n_page_high_ipd <- ((n_motifs_high_ipd - 1) %/% ncol2) + 1
 n_page_low_ipd <- ((n_motifs_low_ipd - 1) %/% ncol2) + 1
@@ -948,11 +1103,15 @@ p_text_PD2182 <- ggdraw() + draw_label("PD2182 (PacBio RS II)\nC. elegans", angl
 p_text_PD2182sequel <- ggdraw() + draw_label("PD2182 (PacBio Sequel)\nC. elegans", angle = 90)
 p_text_k <- ggdraw() + draw_label("VC2010+OP50/native\nC. elegans", angle = 90)
 p_text_l <- ggdraw() + draw_label("VC2010/native\nC. elegans", angle = 90)
+p_text_abcd <- ggdraw() + draw_label("Merged/WGA\nC. elegans", angle = 90)
+p_text_kl <- ggdraw() + draw_label("Merged/native\nC. elegans", angle = 90)
 p_text_ab_ecoli <- ggdraw() + draw_label("VC2010+OP50/WGA\nE. coli", angle = 90)
 p_text_cd_ecoli <- ggdraw() + draw_label("VC2010/WGA\nE. coli", angle = 90)
 p_text_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182 (PacBio Sequel)\nE. coli", angle = 90)
 p_text_k_ecoli <- ggdraw() + draw_label("VC2010+OP50/native\nE. coli", angle = 90)
 p_text_l_ecoli <- ggdraw() + draw_label("VC2010/native\nE. coli", angle = 90)
+p_text_abcd_ecoli <- ggdraw() + draw_label("Merged/WGA\nE. coli", angle = 90)
+p_text_kl_ecoli <- ggdraw() + draw_label("Merged/native\nE. coli", angle = 90)
 rel_widths2 <- c(0.15, rep(1, ncol2))
 
 pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.all_with_ecoli.high.pdf", width = pdf_width, height = pdf_height_high2)
@@ -963,8 +1122,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -975,8 +1136,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -987,8 +1150,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -999,8 +1164,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
                list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1017,8 +1184,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1029,8 +1198,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1041,8 +1212,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1053,8 +1226,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
                list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1066,8 +1241,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1078,8 +1255,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1090,8 +1269,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1102,8 +1283,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
                list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1122,8 +1305,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1134,8 +1319,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1146,8 +1333,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1158,8 +1347,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
                list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1177,8 +1368,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1189,8 +1382,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1201,8 +1396,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1213,8 +1410,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside20[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1226,8 +1425,10 @@ for(i in 1:n_page_high_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1238,8 +1439,10 @@ for(i in 1:n_page_low_ipd){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1250,8 +1453,10 @@ for(i in 1:n_page_select1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1262,8 +1467,10 @@ for(i in 1:n_page_extreme1){
     plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
                list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
                list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs],
                list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside10[p_motifs],
-               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs])
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
 }
 invisible(dev.off())
@@ -1272,11 +1479,12 @@ invisible(dev.off())
 p_text_ab_k <- ggdraw() + draw_label("VC2010+OP50\nC. elegans", angle = 90)
 p_text_cd_l <- ggdraw() + draw_label("VC2010\nC. elegans", angle = 90)
 p_text_null_PD2182sequel <- ggdraw() + draw_label("PD2182\nC. elegans", angle = 90)
+p_text_abcd_kl <- ggdraw() + draw_label("Merged\nC. elegans", angle = 90)
 n_motifs_high_ipd <- length(motifs_high_ipd)
 n_motifs_low_ipd <- length(motifs_low_ipd)
 n_motifs_select1 <- length(motifs_select1)
 n_motifs_extreme1 <- length(motifs_extreme1)
-n_sample <- 3
+n_sample <- 4
 ncol2 <- 3
 n_page_high_ipd <- ((n_motifs_high_ipd - 1) %/% ncol2) + 1
 n_page_low_ipd <- ((n_motifs_low_ipd - 1) %/% ncol2) + 1
@@ -1293,7 +1501,8 @@ for(i in 1:n_page_high_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots[p_motifs], list(p_text_cd_l), cd_l_comparison_plots[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1302,7 +1511,8 @@ for(i in 1:n_page_low_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_low_ipd, i * ncol2))
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots[p_motifs], list(p_text_cd_l), cd_l_comparison_plots[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1311,7 +1521,8 @@ for(i in 1:n_page_select1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_select1, i * ncol2))
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots[p_motifs], list(p_text_cd_l), cd_l_comparison_plots[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1320,7 +1531,8 @@ for(i in 1:n_page_extreme1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_extreme1, i * ncol2))
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots[p_motifs], list(p_text_cd_l), cd_l_comparison_plots[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1335,7 +1547,8 @@ for(i in 1:n_page_high_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside20[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside20[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1344,7 +1557,8 @@ for(i in 1:n_page_low_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_low_ipd, i * ncol2))
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside20[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside20[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1353,7 +1567,8 @@ for(i in 1:n_page_select1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_select1, i * ncol2))
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside20[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside20[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1362,7 +1577,8 @@ for(i in 1:n_page_extreme1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_extreme1, i * ncol2))
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside20[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside20[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside20[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1372,7 +1588,8 @@ for(i in 1:n_page_high_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
     p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside10[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside10[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1381,7 +1598,8 @@ for(i in 1:n_page_low_ipd){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_low_ipd, i * ncol2))
     p_motifs <- c(motifs_low_ipd[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside10[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside10[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1390,7 +1608,8 @@ for(i in 1:n_page_select1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_select1, i * ncol2))
     p_motifs <- c(motifs_select1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside10[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside10[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())
@@ -1399,7 +1618,8 @@ for(i in 1:n_page_extreme1){
     p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_extreme1, i * ncol2))
     p_motifs <- c(motifs_extreme1[p_range], rep("null", ncol2 - length(p_range)))
     plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside10[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside10[p_motifs],
-        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs])
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside10[p_motifs])
     print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = c(0.1, rep(1, ncol2))))
 }
 invisible(dev.off())

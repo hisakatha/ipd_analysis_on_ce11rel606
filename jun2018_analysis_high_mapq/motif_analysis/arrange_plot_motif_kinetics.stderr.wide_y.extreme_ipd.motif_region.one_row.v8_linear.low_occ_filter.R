@@ -26,9 +26,15 @@ get_integer_breaks <- function(values) {
     return(seq(min_values + (fixed_point - min_values) %% step, max_values, by = step))
 }
 
+correlation_output_prefix <- "arrange_plot_motif_kinetics.stderr.wide_y.extreme_ipd.motif_region.one_row.v8_linear.low_occ_filter.correlation"
+correlation_output1 <- paste0(correlation_output_prefix, ".observed_vs_estimate.csv")
+correlation_output2 <- paste0(correlation_output_prefix, ".two_sets.csv")
+invisible(file.remove(correlation_output1))
+invisible(file.remove(correlation_output2))
+
 plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sample_name, ylab_text, global_mean, global_var, global_size){
-    kinetics_occ <- ifelse(kinetics[, .N] == 0, 0, kinetics[, max(src)])
-    estimate_occ <- ifelse(estimate[, .N] == 0, 0, estimate[, max(src)])
+    kinetics_occ <- ifelse(kinetics[, .N] == 0, 0, kinetics[, length(unique(src))])
+    estimate_occ <- ifelse(estimate[, .N] == 0, 0, estimate[, length(unique(src))])
     occ_threshold <- 3
     if (kinetics_occ < occ_threshold | estimate_occ < occ_threshold) {
         g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
@@ -93,18 +99,17 @@ plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sa
         #scale_x_continuous(breaks = 1:kinetics_summary[,max(position)], labels = kinetics_summary$label)
     annot_x_rate <- 0.7
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g1_ret <- g1 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    #g1_ret <- g1 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    g1_ret <- g1
     # g1_outside20
     end_pos <- kinetics[, max(position)] - 20
     annot_x <- quantile(c(kinetics_summary[, min(position)], kinetics_summary[, max(position)]), annot_x_rate, names = FALSE)
     g1_outside20 <- g1 %+% kinetics_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g1_outside10
     plot_data <- kinetics_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g1_outside10 <- g1 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    g1_outside10 <- g1 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     # g2
     plot_data <- merged_summary[region == "Motif"]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
@@ -122,24 +127,24 @@ plot_motif_kinetics <- function(kinetics, estimate, title_text, motif_string, sa
         labs(color = "Data source") +
         coord_cartesian(ylim = c(ylim_lower, ylim_upper)) +
         scale_colour_brewer(palette = "Set1", limits = c("observed", "estimated"), labels = c("observed", "estimated"), drop = FALSE)
-    g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    #g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    fwrite(data.table(motif_string = title_text, sample_name = sample_name, mean_cor = mean_cor, mean_cor_p = mean_cor_p, kinetics_occ = kinetics_occ), file = correlation_output1, append = TRUE)
+    g2_ret <- g2
     # g2_outside20
     annot_x <- quantile(c(merged_summary[, min(position)], merged_summary[, max(position)]), annot_x_rate, names = FALSE)
     g2_outside20 <- g2 %+% merged_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g2_outside10
     plot_data <- merged_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ = %d", title_text, sample_name, mean_cor, mean_cor_p, kinetics_occ), size = 2)
+    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     return(list("ipd" = g1_ret, "ipd_and_estimate" = g2_ret, "ipd_outside20" = g1_outside20, "ipd_outside10" = g1_outside10,
                 "ipd_and_estimate_outside20" = g2_outside20, "ipd_and_estimate_outside10" = g2_outside10))
 }
 
 plot_motif_kinetics_comparison <- function(kinetics1, kinetics2, type1, type2, title_text, motif_string, sample_name, ylab_text, global_mean, global_var, global_size){
-    kinetics1_occ <- ifelse(kinetics1[, .N] == 0, 0, kinetics1[, max(src)])
-    kinetics2_occ <- ifelse(kinetics2[, .N] == 0, 0, kinetics2[, max(src)])
+    kinetics1_occ <- ifelse(kinetics1[, .N] == 0, 0, kinetics1[, length(unique(src))])
+    kinetics2_occ <- ifelse(kinetics2[, .N] == 0, 0, kinetics2[, length(unique(src))])
     occ_threshold <- 3
     if (kinetics1_occ < occ_threshold & kinetics2_occ < occ_threshold) {
         g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
@@ -209,18 +214,18 @@ plot_motif_kinetics_comparison <- function(kinetics1, kinetics2, type1, type2, t
         coord_cartesian(ylim = c(ylim_lower, ylim_upper)) +
         scale_colour_brewer(palette = "Set1", limits = c(type1, type2), labels = c(type1, type2), drop = FALSE)
         #scale_x_continuous(breaks = get_integer_breaks(plot_data[, position])) +
-    g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    #g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    fwrite(data.table(motif_string = title_text, sample_name = sample_name, mean_cor = mean_cor, mean_cor_p = mean_cor_p, type1 = type1, kinetics1_occ = kinetics1_occ, type2 = type2, kinetics2_occ = kinetics2_occ), file = correlation_output2, append = TRUE)
+    g2_ret <- g2
     # g2_outside20
     annot_x <- quantile(c(merged_summary[, min(position)], merged_summary[, max(position)]), annot_x_rate, names = FALSE)
     end_pos <- max(kinetics1[, position], kinetics2[, position]) - 20
     g2_outside20 <- g2 %+% merged_summary + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2) +
         theme(axis.text.x = element_text(size = 5))
     # g2_outside10
     plot_data <- merged_summary[-9 <= position & position <= end_pos - 10]
     annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
-    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
-        annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
     return(list("comparison" = g2_ret, "comparison_outside20" = g2_outside20, "comparison_outside10" = g2_outside10))
 }
 
