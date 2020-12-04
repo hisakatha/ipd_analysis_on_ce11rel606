@@ -21,10 +21,12 @@ motif_dirs4 += ANNGATC CNNGATC GNNGATC TNNGATC GATCGATC
 motif_dirs5 := ATGCAT TGANNNNNNNNTGCT
 # From Blow et al. (2016) https://doi.org/10.1371/journal.pgen.1005854
 motif_dirs6 := ATTAAT AATT CATG RAATTY ATCGAT CTCGAG TTAA GANTC AGCT CTAG
+# known RM system motifs for E. coli K-12
+motif_dirs7 := AACNNNNNNGTGC
 
 old_targets := ATWTTB CGRAACCCG CTGRAA GAGD GCGC GGTCTCGC GKCGGY GTAS HKGAGCA HRGTA RGTAB RTAB TATAA TTTT YGGWR
 
-all_dirs := $(motif_dirs) $(motif_dirs2) $(motif_dirs3) $(motif_dirs4) $(motif_dirs5) $(motif_dirs6)
+all_dirs := $(motif_dirs) $(motif_dirs2) $(motif_dirs3) $(motif_dirs4) $(motif_dirs5) $(motif_dirs6) $(motif_dirs7)
 
 all: $(all_dirs)
 motif: $(motif_dirs) $(motif_dirs2)
