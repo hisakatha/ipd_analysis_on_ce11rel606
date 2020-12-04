@@ -9,7 +9,10 @@ ipdratios <- fread(args[2], header = TRUE)
 
 output_path <- args[3]
 
-if(ipds[,.N] == 0){ fwrite(data.table(), file = output_path); quit("no", 0) }
+if (ipds[, .N] == 0) {
+    fwrite(data.table(position = numeric(0), strand = character(0), value = numeric(0), label = character(0), src = numeric(0)), file = output_path)
+    quit("no", 0)
+}
 
 stopifnot(all(ipds[, position] == ipdratios[, position]))
 stopifnot(all(ipds[, strand] == ipdratios[, strand]))
