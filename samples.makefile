@@ -67,6 +67,7 @@ TDF := $(MERGED).tdf
 CIRCLIZE := $(MERGED).circlize.pdf
 
 DIMER_IPD := dimer_ipd_stats.csv
+TETRAMER_IPD := tetramer_ipd_stats.csv
 
 ALIGNMENT_LEN := $(MERGED).alignment_length
 MERGED_STATS := $(MERGED).stats
@@ -79,6 +80,7 @@ HQ_MERGED_STATS := $(HQ).stats
 targets := $(MERGED) $(BAI) $(BAI_MD) $(FDEPTH) $(RDEPTH) $(DEPTH_PDF) $(BEDGRAPH) $(FWD_BEDGRAPH) $(REV_BEDGRAPH) $(BIGWIG) $(TDF) $(CIRCLIZE) $(targets_DEEP) $(DIMER_IPD) $(BIGWIG_ALL) $(HQ_BIGWIG_ALL)
 targets += $(ALIGNMENT_LEN) $(MERGED_STATS)
 targets += $(HQ_ALIGNMENT_LEN) $(HQ_MERGED_STATS) $(HQ_FDEPTH) $(HQ_RDEPTH) $(HQ_DEEP_REGION_SLOP_FA)
+targets += $(TETRAMER_IPD)
 all: $$(targets)
 
 mapq_comp_csv: $(MAPQ_COMP_CSV) $(BOTH_HIGH_MAPQ_READ)
@@ -255,5 +257,7 @@ $(gathered_ipd): $(scattered_ipds)
 	if [[ $(words $(scattered_ipds)) == 1 ]]; then mkdir -p $$(dirname $@) && ln -s ../kinetics_tools.tasks.ipd_summary-0/basemods.h5 $@; else echo "ERROR: $@ should have been made by pbsmrtpipe" && exit 1; fi
 
 COLLECT_BIN := /glusterfs/hisakatha/methylation/svr_ipd/collect_ipd_per_kmer/collect_ipd
-$(DIMER_IPD): output/tasks/kinetics_tools.tasks.gather_kinetics_h5-1/file.h5
+$(DIMER_IPD): $(gathered_ipd)
 	$(COLLECT_BIN) -k 2 -l 20 -t 25 -o $@ $<
+$(TETRAMER_IPD): $(gathered_ipd)
+	$(COLLECT_BIN) -k 4 -l 20 -t 25 -o $@ $<
