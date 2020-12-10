@@ -255,7 +255,8 @@ motif_titles <- list("AGGCTT_4" = "(AGGCTT)4", "AGGY_7" = "(AGGY)7", "GGN_10" = 
 motif_strings <- list("AGGCTT_4" = "AGGCTTAGGCTTAGGCTTAGGCTT", "AGGY_7" = "AGGYAGGYAGGYAGGYAGGYAGGYAGGY", "GGN_10" = "GGNGGNGGNGGNGGNGGNGGNGGNGGNGGN", "GGN_4" = "GGNGGNGGNGGN")
 
 # Assuming ncol is 3, preparing arrangement of select1 and select2
-motifs_select1 <- c(motifs_select1, "null", motifs_select2, "null", "null", motifs_select1, motifs_select2, motifs_select3, motifs_select4)
+#motifs_select1 <- c(motifs_select1, "null", motifs_select2, "null", "null", motifs_select1, motifs_select2, motifs_select3, motifs_select4)
+motifs_select1 <- c(motifs_select1, motifs_select2, motifs_select3, motifs_select4)
 
 lookup_motif_title <- function(motif_dir){
     if(is.null(motif_titles[[motif_dir]])){

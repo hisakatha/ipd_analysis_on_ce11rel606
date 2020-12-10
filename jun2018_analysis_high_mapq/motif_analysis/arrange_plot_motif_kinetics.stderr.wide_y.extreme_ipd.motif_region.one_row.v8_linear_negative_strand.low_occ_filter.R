@@ -223,7 +223,7 @@ plot_motif_kinetics_comparison <- function(kinetics1_summary, kinetics2_summary,
     return(list("comparison" = g2_ret, "comparison_outside20" = g2_outside20, "comparison_outside10" = g2_outside10))
 }
 
-motifs_select1 <- "TGANNNNNNNNTGCT"
+motifs_select1 <- c("TGANNNNNNNNTGCT", "AACNNNNNNGTGC")
 
 #motif_dirs <- unique(c(motifs_high_ipd, motifs_low_ipd, motifs_select1, motifs_select2, motifs_select3, motifs_select4))
 motif_dirs <- unique(c(motifs_select1))
@@ -249,7 +249,7 @@ lookup_motif_string <- function(motif_dir){
     }
 }
 
-revcomp_motif_strings <- list("TGANNNNNNNNTGCT" = "AGCANNNNNNNNTCA")
+revcomp_motif_strings <- list("TGANNNNNNNNTGCT" = "AGCANNNNNNNNTCA", "AACNNNNNNGTGC", "GCACNNNNNNGTT")
 
 lookup_revcomp_motif_string <- function(motif_dir){
     if(is.null(revcomp_motif_strings[[motif_dir]])){
