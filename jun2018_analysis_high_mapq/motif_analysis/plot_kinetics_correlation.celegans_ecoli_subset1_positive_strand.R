@@ -41,19 +41,19 @@ k_mean_ecoli <- mean_log2value(k_ipd_ecoli)[, .(position, strand, k = m)]
 l_mean_ecoli <- mean_log2value(l_ipd_ecoli)[, .(position, strand, l = m)]
 
 # Rename columns
-setnames(ab_mean, "ab", "VC2010+OP50\n/WGA\n/C. elegans")
-setnames(cd_mean, "cd", "VC2010\n/WGA\n/C. elegans")
-setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(PacBio Sequel)\n/C. elegans")
-setnames(k_normBy_ab_mean, "k_normBy_ab", "VC2010+OP50\n/C. elegans")
-setnames(l_normBy_cd_mean, "l_normBy_cd", "VC2010\n/C. elegans")
-setnames(k_mean, "k", "VC2010+OP50\n/native\n/C. elegans")
-setnames(l_mean, "l", "VC2010\n/native\n/C. elegans")
-setnames(ab_mean_ecoli, "ab", "VC2010+OP50\n/WGA\n/E. coli")
-setnames(cd_mean_ecoli, "cd", "VC2010\n/WGA\n/E. coli")
-setnames(k_normBy_ab_mean_ecoli, "k_normBy_ab", "VC2010+OP50\n/E. coli")
-setnames(l_normBy_cd_mean_ecoli, "l_normBy_cd", "VC2010\n/E. coli")
-setnames(k_mean_ecoli, "k", "VC2010+OP50\n/native\n/E. coli")
-setnames(l_mean_ecoli, "l", "VC2010\n/native\n/E. coli")
+setnames(ab_mean, "ab", "Replicate 1\n/WGA\n/C. elegans")
+setnames(cd_mean, "cd", "Replicate 2\n/WGA\n/C. elegans")
+setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n/native\n/C. elegans")
+setnames(k_normBy_ab_mean, "k_normBy_ab", "Replicate 1\n/C. elegans")
+setnames(l_normBy_cd_mean, "l_normBy_cd", "Replicate 2\n/C. elegans")
+setnames(k_mean, "k", "Replicate 1\n/native\n/C. elegans")
+setnames(l_mean, "l", "Replicate 2\n/native\n/C. elegans")
+setnames(ab_mean_ecoli, "ab", "Replicate 1\n/WGA\n/E. coli")
+setnames(cd_mean_ecoli, "cd", "Replicate 2\n/WGA\n/E. coli")
+setnames(k_normBy_ab_mean_ecoli, "k_normBy_ab", "Replicate 1\n/E. coli")
+setnames(l_normBy_cd_mean_ecoli, "l_normBy_cd", "Replicate 2\n/E. coli")
+setnames(k_mean_ecoli, "k", "Replicate 1\n/native\n/E. coli")
+setnames(l_mean_ecoli, "l", "Replicate 2\n/native\n/E. coli")
 
 ipd_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(ab_mean, cd_mean, k_mean, l_mean, PD2182sequel_mean, ab_mean_ecoli, cd_mean_ecoli, k_mean_ecoli, l_mean_ecoli))
 ipd_table[, c("position", "strand") := NULL]

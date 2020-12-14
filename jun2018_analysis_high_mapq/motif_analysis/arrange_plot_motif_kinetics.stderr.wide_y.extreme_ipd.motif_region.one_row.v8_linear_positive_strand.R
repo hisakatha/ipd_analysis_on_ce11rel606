@@ -470,7 +470,7 @@ for (motif_dir in motif_dirs) {
     cat(sprintf("Start processing motif %s\n", motif_dir))
     ab_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.c_elegans.summary.csv"))
     ab_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.ab.c_elegans.summary.csv"))
-    ab_plots_tmp <- plot_motif_kinetics(ab_ipd, ab_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/WGA\n/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_plots_tmp <- plot_motif_kinetics(ab_ipd, ab_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/WGA\n/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
     ab_plots[[motif_dir]] <- ab_plots_tmp[["ipd"]]
     ab_plots_with_estimate[[motif_dir]] <- ab_plots_tmp[["ipd_and_estimate"]]
     ab_plots_outside20[[motif_dir]] <- ab_plots_tmp[["ipd_outside20"]]
@@ -485,7 +485,7 @@ for (motif_dir in motif_dirs) {
 
     cd_ipd <- fread(paste0(motif_dir, "/motif_ipd.cd.c_elegans.summary.csv"))
     cd_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.cd.c_elegans.summary.csv"))
-    cd_plots_tmp <- plot_motif_kinetics(cd_ipd, cd_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/WGA\n/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_plots_tmp <- plot_motif_kinetics(cd_ipd, cd_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/WGA\n/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
     cd_plots[[motif_dir]] <- cd_plots_tmp[["ipd"]]
     cd_plots_with_estimate[[motif_dir]] <- cd_plots_tmp[["ipd_and_estimate"]]
     cd_plots_outside20[[motif_dir]] <- cd_plots_tmp[["ipd_outside20"]]
@@ -505,7 +505,7 @@ for (motif_dir in motif_dirs) {
     
     k_ipd <- fread(paste0(motif_dir, "/motif_ipd.k.c_elegans.summary.csv"))
     k_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.k.c_elegans.summary.csv"))
-    k_plots_tmp <- plot_motif_kinetics(k_ipd, k_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/native\n/C. elegans", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
+    k_plots_tmp <- plot_motif_kinetics(k_ipd, k_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/native\n/C. elegans", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
     k_plots[[motif_dir]] <- k_plots_tmp[["ipd"]]
     k_plots_with_estimate[[motif_dir]] <- k_plots_tmp[["ipd_and_estimate"]]
     k_plots_outside20[[motif_dir]] <- k_plots_tmp[["ipd_outside20"]]
@@ -515,7 +515,7 @@ for (motif_dir in motif_dirs) {
     
     l_ipd <- fread(paste0(motif_dir, "/motif_ipd.l.c_elegans.summary.csv"))
     l_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.l.c_elegans.summary.csv"))
-    l_plots_tmp <- plot_motif_kinetics(l_ipd, l_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/native\n/C. elegans", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
+    l_plots_tmp <- plot_motif_kinetics(l_ipd, l_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/native\n/C. elegans", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
     l_plots[[motif_dir]] <- l_plots_tmp[["ipd"]]
     l_plots_with_estimate[[motif_dir]] <- l_plots_tmp[["ipd_and_estimate"]]
     l_plots_outside20[[motif_dir]] <- l_plots_tmp[["ipd_outside20"]]
@@ -545,7 +545,7 @@ for (motif_dir in motif_dirs) {
 
     ab_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.e_coli.summary.csv"))
     ab_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.ab.e_coli.summary.csv"))
-    ab_ecoli_plots_tmp <- plot_motif_kinetics(ab_ecoli_ipd, ab_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/WGA\n/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
+    ab_ecoli_plots_tmp <- plot_motif_kinetics(ab_ecoli_ipd, ab_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/WGA\n/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
     ab_ecoli_plots[[motif_dir]] <- ab_ecoli_plots_tmp[["ipd"]]
     ab_ecoli_plots_with_estimate[[motif_dir]] <- ab_ecoli_plots_tmp[["ipd_and_estimate"]]
     ab_ecoli_plots_outside20[[motif_dir]] <- ab_ecoli_plots_tmp[["ipd_outside20"]]
@@ -555,7 +555,7 @@ for (motif_dir in motif_dirs) {
 
     cd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.cd.e_coli.summary.csv"))
     cd_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.cd.e_coli.summary.csv"))
-    cd_ecoli_plots_tmp <- plot_motif_kinetics(cd_ecoli_ipd, cd_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/WGA\n/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
+    cd_ecoli_plots_tmp <- plot_motif_kinetics(cd_ecoli_ipd, cd_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/WGA\n/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
     cd_ecoli_plots[[motif_dir]] <- cd_ecoli_plots_tmp[["ipd"]]
     cd_ecoli_plots_with_estimate[[motif_dir]] <- cd_ecoli_plots_tmp[["ipd_and_estimate"]]
     cd_ecoli_plots_outside20[[motif_dir]] <- cd_ecoli_plots_tmp[["ipd_outside20"]]
@@ -565,7 +565,7 @@ for (motif_dir in motif_dirs) {
 
     k_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.k.e_coli.summary.csv"))
     k_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.k.e_coli.summary.csv"))
-    k_ecoli_plots_tmp <- plot_motif_kinetics(k_ecoli_ipd, k_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/native\n/E. coli", ylab_expr, N_k_ecoli_deep_IPD_mean, N_k_ecoli_deep_IPD_var, N_k_ecoli_deep_IPD_size)
+    k_ecoli_plots_tmp <- plot_motif_kinetics(k_ecoli_ipd, k_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/native\n/E. coli", ylab_expr, N_k_ecoli_deep_IPD_mean, N_k_ecoli_deep_IPD_var, N_k_ecoli_deep_IPD_size)
     k_ecoli_plots[[motif_dir]] <- k_ecoli_plots_tmp[["ipd"]]
     k_ecoli_plots_with_estimate[[motif_dir]] <- k_ecoli_plots_tmp[["ipd_and_estimate"]]
     k_ecoli_plots_outside20[[motif_dir]] <- k_ecoli_plots_tmp[["ipd_outside20"]]
@@ -575,7 +575,7 @@ for (motif_dir in motif_dirs) {
 
     l_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.l.e_coli.summary.csv"))
     l_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.l.e_coli.summary.csv"))
-    l_ecoli_plots_tmp <- plot_motif_kinetics(l_ecoli_ipd, l_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/native\n/E. coli", ylab_expr, N_l_ecoli_deep_IPD_mean, N_l_ecoli_deep_IPD_var, N_l_ecoli_deep_IPD_size)
+    l_ecoli_plots_tmp <- plot_motif_kinetics(l_ecoli_ipd, l_ecoli_modelPrediction, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/native\n/E. coli", ylab_expr, N_l_ecoli_deep_IPD_mean, N_l_ecoli_deep_IPD_var, N_l_ecoli_deep_IPD_size)
     l_ecoli_plots[[motif_dir]] <- l_ecoli_plots_tmp[["ipd"]]
     l_ecoli_plots_with_estimate[[motif_dir]] <- l_ecoli_plots_tmp[["ipd_and_estimate"]]
     l_ecoli_plots_outside20[[motif_dir]] <- l_ecoli_plots_tmp[["ipd_outside20"]]
@@ -615,19 +615,19 @@ for (motif_dir in motif_dirs) {
 
     type1_text <- "C. elegans"
     type2_text <- "E. coli"
-    ab_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, ab_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/WGA", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, ab_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/WGA", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
     ab_comparison_plots[[motif_dir]] <- ab_comparison_plots_tmp[["comparison"]]
     ab_comparison_plots_outside20[[motif_dir]] <- ab_comparison_plots_tmp[["comparison_outside20"]]
     ab_comparison_plots_outside10[[motif_dir]] <- ab_comparison_plots_tmp[["comparison_outside10"]]
-    cd_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, cd_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/WGA", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, cd_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/WGA", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
     cd_comparison_plots[[motif_dir]] <- cd_comparison_plots_tmp[["comparison"]]
     cd_comparison_plots_outside20[[motif_dir]] <- cd_comparison_plots_tmp[["comparison_outside20"]]
     cd_comparison_plots_outside10[[motif_dir]] <- cd_comparison_plots_tmp[["comparison_outside10"]]
-    k_comparison_plots_tmp <- plot_motif_kinetics_comparison(k_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/native", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
+    k_comparison_plots_tmp <- plot_motif_kinetics_comparison(k_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/native", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
     k_comparison_plots[[motif_dir]] <- k_comparison_plots_tmp[["comparison"]]
     k_comparison_plots_outside20[[motif_dir]] <- k_comparison_plots_tmp[["comparison_outside20"]]
     k_comparison_plots_outside10[[motif_dir]] <- k_comparison_plots_tmp[["comparison_outside10"]]
-    l_comparison_plots_tmp <- plot_motif_kinetics_comparison(l_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/native", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
+    l_comparison_plots_tmp <- plot_motif_kinetics_comparison(l_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/native", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
     l_comparison_plots[[motif_dir]] <- l_comparison_plots_tmp[["comparison"]]
     l_comparison_plots_outside20[[motif_dir]] <- l_comparison_plots_tmp[["comparison_outside20"]]
     l_comparison_plots_outside10[[motif_dir]] <- l_comparison_plots_tmp[["comparison_outside10"]]
@@ -650,11 +650,11 @@ for (motif_dir in motif_dirs) {
     type1_text <- "WGA"
     type2_text <- "native"
     # WGA vs native in C. elegans
-    ab_k_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, k_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_k_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, k_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
     ab_k_comparison_plots[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison"]]
     ab_k_comparison_plots_outside20[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside20"]]
     ab_k_comparison_plots_outside10[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside10"]]
-    cd_l_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, l_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_l_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, l_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
     cd_l_comparison_plots[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison"]]
     cd_l_comparison_plots_outside20[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside20"]]
     cd_l_comparison_plots_outside10[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside10"]]
@@ -667,11 +667,11 @@ for (motif_dir in motif_dirs) {
     abcd_kl_comparison_plots_outside20[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside20"]]
     abcd_kl_comparison_plots_outside10[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside10"]]
     # WGA vs native in E. coli
-    ab_k_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(ab_ecoli_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010+OP50/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
+    ab_k_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(ab_ecoli_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
     ab_k_comparison_ecoli_plots[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison"]]
     ab_k_comparison_ecoli_plots_outside20[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison_outside20"]]
     ab_k_comparison_ecoli_plots_outside10[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison_outside10"]]
-    cd_l_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(cd_ecoli_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "VC2010/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
+    cd_l_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(cd_ecoli_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
     cd_l_comparison_ecoli_plots[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison"]]
     cd_l_comparison_ecoli_plots_outside20[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison_outside20"]]
     cd_l_comparison_ecoli_plots_outside10[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison_outside10"]]
@@ -834,11 +834,11 @@ pdf_height_low2 <- n_sample * height_per_motif
 pdf_height_select1 <- n_sample * height_per_motif
 pdf_height_extreme1 <- n_sample * height_per_motif
 
-p_text_ab <- ggdraw() + draw_label("VC2010+OP50/WGA", angle = 90)
-p_text_cd <- ggdraw() + draw_label("VC2010/WGA", angle = 90)
-p_text_PD2182sequel <- ggdraw() + draw_label("PD2182 (PacBio Sequel)", angle = 90)
-p_text_k <- ggdraw() + draw_label("VC2010+OP50/native", angle = 90)
-p_text_l <- ggdraw() + draw_label("VC2010/native", angle = 90)
+p_text_ab <- ggdraw() + draw_label("replicate 1/WGA", angle = 90)
+p_text_cd <- ggdraw() + draw_label("replicate 2/WGA", angle = 90)
+p_text_PD2182sequel <- ggdraw() + draw_label("PD2182/native", angle = 90)
+p_text_k <- ggdraw() + draw_label("replicate 1/native", angle = 90)
+p_text_l <- ggdraw() + draw_label("replicate 2/native", angle = 90)
 p_text_abcd <- ggdraw() + draw_label("Merged/WGA", angle = 90)
 p_text_kl <- ggdraw() + draw_label("Merged/native", angle = 90)
 rel_widths2 <- c(0.1, rep(1, ncol2))
@@ -1156,19 +1156,19 @@ pdf_height_low2 <- n_sample * height_per_motif
 pdf_height_select1 <- n_sample * height_per_motif
 pdf_height_extreme1 <- n_sample * height_per_motif
 
-p_text_ab <- ggdraw() + draw_label("VC2010+OP50/WGA\nC. elegans", angle = 90)
-p_text_cd <- ggdraw() + draw_label("VC2010/WGA\nC. elegans", angle = 90)
-p_text_PD2182 <- ggdraw() + draw_label("PD2182 (PacBio RS II)\nC. elegans", angle = 90)
-p_text_PD2182sequel <- ggdraw() + draw_label("PD2182 (PacBio Sequel)\nC. elegans", angle = 90)
-p_text_k <- ggdraw() + draw_label("VC2010+OP50/native\nC. elegans", angle = 90)
-p_text_l <- ggdraw() + draw_label("VC2010/native\nC. elegans", angle = 90)
+p_text_ab <- ggdraw() + draw_label("replicate 1/WGA\nC. elegans", angle = 90)
+p_text_cd <- ggdraw() + draw_label("replicate 2/WGA\nC. elegans", angle = 90)
+p_text_PD2182 <- ggdraw() + draw_label("PD2182 (RS II)/native\nC. elegans", angle = 90)
+p_text_PD2182sequel <- ggdraw() + draw_label("PD2182/native\nC. elegans", angle = 90)
+p_text_k <- ggdraw() + draw_label("replicate 1/native\nC. elegans", angle = 90)
+p_text_l <- ggdraw() + draw_label("replicate 2/native\nC. elegans", angle = 90)
 p_text_abcd <- ggdraw() + draw_label("Merged/WGA\nC. elegans", angle = 90)
 p_text_kl <- ggdraw() + draw_label("Merged/native\nC. elegans", angle = 90)
-p_text_ab_ecoli <- ggdraw() + draw_label("VC2010+OP50/WGA\nE. coli", angle = 90)
-p_text_cd_ecoli <- ggdraw() + draw_label("VC2010/WGA\nE. coli", angle = 90)
-p_text_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182 (PacBio Sequel)\nE. coli", angle = 90)
-p_text_k_ecoli <- ggdraw() + draw_label("VC2010+OP50/native\nE. coli", angle = 90)
-p_text_l_ecoli <- ggdraw() + draw_label("VC2010/native\nE. coli", angle = 90)
+p_text_ab_ecoli <- ggdraw() + draw_label("replicate 1/WGA\nE. coli", angle = 90)
+p_text_cd_ecoli <- ggdraw() + draw_label("replicate 2/WGA\nE. coli", angle = 90)
+p_text_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182/native\nE. coli", angle = 90)
+p_text_k_ecoli <- ggdraw() + draw_label("replicate 1/native\nE. coli", angle = 90)
+p_text_l_ecoli <- ggdraw() + draw_label("replicate 2/native\nE. coli", angle = 90)
 p_text_abcd_ecoli <- ggdraw() + draw_label("Merged/WGA\nE. coli", angle = 90)
 p_text_kl_ecoli <- ggdraw() + draw_label("Merged/native\nE. coli", angle = 90)
 rel_widths2 <- c(0.15, rep(1, ncol2))
@@ -1535,12 +1535,12 @@ for(i in 1:n_page_extreme1){
 invisible(dev.off())
 
 # All sample arrangement (comparison of WGA and native)
-p_text_ab_k <- ggdraw() + draw_label("VC2010+OP50\nC. elegans", angle = 90)
-p_text_cd_l <- ggdraw() + draw_label("VC2010\nC. elegans", angle = 90)
+p_text_ab_k <- ggdraw() + draw_label("replicate 1\nC. elegans", angle = 90)
+p_text_cd_l <- ggdraw() + draw_label("replicate 2\nC. elegans", angle = 90)
 p_text_null_PD2182sequel <- ggdraw() + draw_label("PD2182\nC. elegans", angle = 90)
 p_text_abcd_kl <- ggdraw() + draw_label("Merged\nC. elegans", angle = 90)
-p_text_ab_k_ecoli <- ggdraw() + draw_label("VC2010+OP50\nE. coli", angle = 90)
-p_text_cd_l_ecoli <- ggdraw() + draw_label("VC2010\nE. coli", angle = 90)
+p_text_ab_k_ecoli <- ggdraw() + draw_label("replicate 1\nE. coli", angle = 90)
+p_text_cd_l_ecoli <- ggdraw() + draw_label("replicate 2\nE. coli", angle = 90)
 p_text_null_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182\nE. coli", angle = 90)
 p_text_abcd_kl_ecoli <- ggdraw() + draw_label("Merged\nE. coli", angle = 90)
 n_motifs_high_ipd <- length(motifs_high_ipd)

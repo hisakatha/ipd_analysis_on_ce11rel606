@@ -29,8 +29,8 @@ plot_rmse_cor_vs_coverage <- function(data1, name1, data2, name2) {
 }
 
 source("load_jun2018_data.saved.fst.basic_wga.R")
-ab_name <- "VC2010+OP50(WGA)"
-cd_name <- "VC2010(WGA)"
+ab_name <- "replicate 1 (WGA)"
+cd_name <- "replicate 2 (WGA)"
 
 pdf_width <- 6;
 pdf_height <- 4;

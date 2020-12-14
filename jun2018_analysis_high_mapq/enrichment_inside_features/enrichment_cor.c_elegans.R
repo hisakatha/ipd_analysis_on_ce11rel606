@@ -12,17 +12,15 @@ d_low_table <- spread(d_low[region != "ALL" & base != "ALL", .(sample, region, b
 d_mod_table <- spread(d_mod[region != "ALL" & base != "ALL", .(sample, region, base, enrichment)], sample, enrichment)
 
 # Rename columns
-#old_cols <- c("ab", "cd", "k", "l", "PD2182", "PD2182sequel")
-#new_cols <- c("VC2010+OP50\n/WGA", "VC2010\n/WGA", "VC2010+OP50\n/native", "VC2010\n/native", "PD2182\n(PacBio RS II)", "PD2182\n(PacBio Sequel)")
 old_cols <- c("ab", "cd", "k", "l", "PD2182sequel")
-new_cols <- c("VC2010+OP50\n/WGA", "VC2010\n/WGA", "VC2010+OP50\n/native", "VC2010\n/native", "PD2182\n/native")
+new_cols <- c("replicate 1\n/WGA", "replicate 2\n/WGA", "replicate 1\n/native", "replicate 2\n/native", "PD2182\n/native")
 d_high_table <- d_high_table[, ..old_cols]
 d_low_table <- d_low_table[, ..old_cols]
 setnames(d_high_table, old = old_cols, new = new_cols)
 setnames(d_low_table, old = old_cols, new = new_cols)
 
 old_cols <- c("k_normBy_ab", "l_normBy_cd")
-new_cols <- c("VC2010+OP50", "VC2010")
+new_cols <- c("replicate 1", "replicate 2")
 d_mod_table <- d_mod_table[, ..old_cols]
 setnames(d_mod_table, old = old_cols, new = new_cols)
 

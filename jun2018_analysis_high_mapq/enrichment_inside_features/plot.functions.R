@@ -1,5 +1,15 @@
 library(data.table)
 library(ggplot2)
+
+name_ab <- "replicate 1/WGA"
+name_cd <- "replicate 2/WGA"
+name_k <- "replicate 1/native"
+name_l <- "replicate 2/native"
+name_k_normBy_ab <- "replicate 1"
+name_l_normBy_cd <- "replicate 2"
+name_PD2182 <- "PD2182 (RS II)/native"
+name_PD2182sequel <- "PD2182/native"
+
 plot.enrichment <- function(data, target_sample, ylab_text) {
     # You have to avoid a name conflict, because "data" has a column "sample".
     sub_data <- data[sample == target_sample]
@@ -7,9 +17,9 @@ plot.enrichment <- function(data, target_sample, ylab_text) {
     #sub_data[region == "All", label := .(sprintf("%s\n(Control)", region))]
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
-    target_sample <- ifelse(target_sample == "k_normBy_ab", "VC2010+OP50", ifelse(target_sample == "l_normBy_cd", "VC2010", target_sample))
-    target_sample <- ifelse(target_sample == "ab", "VC2010+OP50 (WGA)", ifelse(target_sample == "cd", "VC2010 (WGA)", target_sample))
-    target_sample <- ifelse(target_sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(target_sample == "PD2182sequel", "PD2182/native", target_sample))
+    target_sample <- ifelse(target_sample == "k_normBy_ab", name_k_normBy_ab, ifelse(target_sample == "l_normBy_cd", name_l_normBy_cd, target_sample))
+    target_sample <- ifelse(target_sample == "ab", name_ab, ifelse(target_sample == "cd", name_cd, target_sample))
+    target_sample <- ifelse(target_sample == "PD2182", name_PD2182, ifelse(target_sample == "PD2182sequel", name_PD2182sequel, target_sample))
     ggplot(sub_data, aes(base, enrichment)) + geom_point() + facet_grid(. ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
         xlab("Base") + ylab(ylab_text) + geom_hline(yintercept = 1, alpha = 0.5) +
@@ -23,9 +33,9 @@ plot.enrichment.dual_facet <- function(data, target_sample, ylab_text) {
     #sub_data[region == "All", label := .(sprintf("%s\n(Control)", region))]
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
-    target_sample <- ifelse(target_sample == "k_normBy_ab", "VC2010+OP50", ifelse(target_sample == "l_normBy_cd", "VC2010", target_sample))
-    target_sample <- ifelse(target_sample == "ab", "VC2010+OP50 (WGA)", ifelse(target_sample == "cd", "VC2010 (WGA)", target_sample))
-    target_sample <- ifelse(target_sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(target_sample == "PD2182sequel", "PD2182/native", target_sample))
+    target_sample <- ifelse(target_sample == "k_normBy_ab", name_k_normBy_ab, ifelse(target_sample == "l_normBy_cd", name_l_normBy_cd, target_sample))
+    target_sample <- ifelse(target_sample == "ab", name_ab, ifelse(target_sample == "cd", name_cd, target_sample))
+    target_sample <- ifelse(target_sample == "PD2182", name_PD2182, ifelse(target_sample == "PD2182sequel", name_PD2182sequel, target_sample))
     ggplot(sub_data, aes("", enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
         xlab(NULL) + scale_x_discrete(breaks = NULL) + ylab(ylab_text) + geom_hline(yintercept = 1, alpha = 0.5) +
@@ -39,9 +49,9 @@ plot.enrichment.dual_facet.all_sample <- function(data, ylab_text) {
     #sub_data[region == "All", label := .(sprintf("%s\n(Control)", region))]
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50 (WGA)", ifelse(sample == "cd", "VC2010 (WGA)",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
         xlab("Sample") + ylab(ylab_text) + geom_hline(yintercept = 1, alpha = 0.5) +
@@ -55,11 +65,11 @@ plot.enrichment.dual_facet.all_sample.v2 <- function(data, ylab_text) {
     #sub_data[region == "All", label := .(sprintf("%s\n(Control)", region))]
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50/WGA", ifelse(sample == "cd", "VC2010/WGA",
-        ifelse(sample == "k", "VC2010+OP50/native", ifelse(sample == "l", "VC2010/native",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))))]
-    sub_data[, "sample" := factor(sample, levels = c("VC2010+OP50/WGA", "VC2010/WGA", "VC2010+OP50/native", "VC2010/native", "PD2182 (PacBio RS II)/native", "PD2182/native", "VC2010+OP50", "VC2010"))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "k", name_k, ifelse(sample == "l", name_l,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))))]
+    sub_data[, "sample" := factor(sample, levels = c(name_ab, name_cd, name_k, name_l, name_PD2182, name_PD2182sequel, name_k_normBy_ab, name_l_normBy_cd))]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 8 / ggplot2::.pt) +
         xlab("Sample") + ylab(ylab_text) + geom_hline(yintercept = 1, alpha = 0.5) +
@@ -75,9 +85,9 @@ plot.enrichment.dual_facet.all_sample.subset1 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "ab" | sample == "cd"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50 (WGA)", ifelse(sample == "cd", "VC2010 (WGA)",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))]
     sub_data <- sub_data[region == "enhancer" | region == "five prime utr" | region == "exon" | region == "intron" | region == "three prime utr" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
@@ -94,9 +104,9 @@ plot.enrichment.dual_facet.all_sample.subset2 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "ab" | sample == "cd"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50 (WGA)", ifelse(sample == "cd", "VC2010 (WGA)",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))]
     sub_data <- sub_data[region == "enhancer" | region == "promoter" | region == "five prime utr" | region == "exon" | region == "intron" | region == "three prime utr" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
@@ -113,9 +123,9 @@ plot.enrichment.dual_facet.all_sample.subset3 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "k_normBy_ab" | sample == "l_normBy_cd"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50 (WGA)", ifelse(sample == "cd", "VC2010 (WGA)",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))]
     sub_data <- sub_data[region == "promoter" | region == "exon" | region == "intron" | region == "three prime utr" | region == "TTS [0, 500]" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5) +
@@ -132,11 +142,11 @@ plot.enrichment.dual_facet.all_sample.subset1.v2 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "ab" | sample == "cd" | sample == "k" | sample == "l"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50/WGA", ifelse(sample == "cd", "VC2010/WGA",
-        ifelse(sample == "k", "VC2010+OP50/native", ifelse(sample == "l", "VC2010/native",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))))]
-    sub_data[, "sample" := factor(sample, levels = c("VC2010+OP50/WGA", "VC2010/WGA", "VC2010+OP50/native", "VC2010/native", "PD2182 (PacBio RS II)/native", "PD2182/native", "VC2010+OP50", "VC2010"))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "k", name_k, ifelse(sample == "l", name_l,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))))]
+    sub_data[, "sample" := factor(sample, levels = c(name_ab, name_cd, name_k, name_l, name_PD2182, name_PD2182sequel, name_k_normBy_ab, name_l_normBy_cd))]
     sub_data <- sub_data[region == "enhancer" | region == "five prime utr" | region == "exon" | region == "intron" | region == "three prime utr" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 8 / ggplot2::.pt) +
@@ -153,11 +163,11 @@ plot.enrichment.dual_facet.all_sample.subset2.v2 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "ab" | sample == "cd" | sample == "k" | sample == "l"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50/WGA", ifelse(sample == "cd", "VC2010/WGA",
-        ifelse(sample == "k", "VC2010+OP50/native", ifelse(sample == "l", "VC2010/native",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))))]
-    sub_data[, "sample" := factor(sample, levels = c("VC2010+OP50/WGA", "VC2010/WGA", "VC2010+OP50/native", "VC2010/native", "PD2182 (PacBio RS II)/native", "PD2182/native", "VC2010+OP50", "VC2010"))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "k", name_k, ifelse(sample == "l", name_l,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))))]
+    sub_data[, "sample" := factor(sample, levels = c(name_ab, name_cd, name_k, name_l, name_PD2182, name_PD2182sequel, name_k_normBy_ab, name_l_normBy_cd))]
     sub_data <- sub_data[region == "enhancer" | region == "promoter" | region == "five prime utr" | region == "exon" | region == "intron" | region == "three prime utr" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 8 / ggplot2::.pt) +
@@ -174,11 +184,11 @@ plot.enrichment.dual_facet.all_sample.subset3.v2 <- function(data, ylab_text) {
     sub_data[, qvalue := .(p.adjust(pvalue, method = "BH"))][, qvalue_mark := .(ifelse(qvalue > 0.05, "", ifelse(qvalue > 0.01, "*", ifelse(qvalue > 0.001, "**", "***"))))]
     sub_data$base <- factor(sub_data$base, levels = c("A", "C", "G", "T", "ALL"))
     sub_data <- sub_data[sample == "k_normBy_ab" | sample == "l_normBy_cd"]
-    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", "VC2010+OP50", ifelse(sample == "l_normBy_cd", "VC2010",
-        ifelse(sample == "ab", "VC2010+OP50/WGA", ifelse(sample == "cd", "VC2010/WGA",
-        ifelse(sample == "k", "VC2010+OP50/native", ifelse(sample == "l", "VC2010/native",
-        ifelse(sample == "PD2182", "PD2182 (PacBio RS II)/native", ifelse(sample == "PD2182sequel", "PD2182/native", sample))))))))]
-    sub_data[, "sample" := factor(sample, levels = c("VC2010+OP50/WGA", "VC2010/WGA", "VC2010+OP50/native", "VC2010/native", "PD2182 (PacBio RS II)/native", "PD2182/native", "VC2010+OP50", "VC2010"))]
+    sub_data[, "sample" := ifelse(sample == "k_normBy_ab", name_k_normBy_ab, ifelse(sample == "l_normBy_cd", name_l_normBy_cd,
+        ifelse(sample == "ab", name_ab, ifelse(sample == "cd", name_cd,
+        ifelse(sample == "k", name_k, ifelse(sample == "l", name_l,
+        ifelse(sample == "PD2182", name_PD2182, ifelse(sample == "PD2182sequel", name_PD2182sequel, sample))))))))]
+    sub_data[, "sample" := factor(sample, levels = c(name_ab, name_cd, name_k, name_l, name_PD2182, name_PD2182sequel, name_k_normBy_ab, name_l_normBy_cd))]
     sub_data <- sub_data[region == "promoter" | region == "exon" | region == "intron" | region == "three prime utr" | region == "TTS [0, 500]" | region == "tandem repeat"]
     ggplot(sub_data, aes(sample, enrichment)) + geom_point() + facet_grid(base ~ region_label) +
         geom_text(aes(label = qvalue_mark), vjust = 0, hjust = 0.5, size = 10 / ggplot2::.pt) +

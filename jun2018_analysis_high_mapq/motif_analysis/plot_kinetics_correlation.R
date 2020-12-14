@@ -26,12 +26,12 @@ k_normBy_ab_mean <- mean_log2value(k_normBy_ab_ipdratio)[, .(position, strand, k
 l_normBy_cd_mean <- mean_log2value(l_normBy_cd_ipdratio)[, .(position, strand, l_normBy_cd = m)]
 
 # Rename columns
-setnames(ab_mean, "ab", "VC2010+OP50\n(WGA)")
-setnames(cd_mean, "cd", "VC2010\n(WGA)")
+setnames(ab_mean, "ab", "Replicate 1\n(WGA)")
+setnames(cd_mean, "cd", "Replicate 2\n(WGA)")
 setnames(PD2182_mean, "PD2182", "PD2182\n(PacBio RS II)")
 setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(PacBio Sequel)")
-setnames(k_normBy_ab_mean, "k_normBy_ab", "VC2010+OP50")
-setnames(l_normBy_cd_mean, "l_normBy_cd", "VC2010")
+setnames(k_normBy_ab_mean, "k_normBy_ab", "Replicate 1")
+setnames(l_normBy_cd_mean, "l_normBy_cd", "Replicate 2")
 
 ipd_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(ab_mean, cd_mean, PD2182_mean, PD2182sequel_mean))
 ipd_table[, c("position", "strand") := NULL]

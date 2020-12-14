@@ -30,14 +30,14 @@ k_mean <- mean_log2value(k_ipd)[, .(position, strand, k = m)]
 l_mean <- mean_log2value(l_ipd)[, .(position, strand, l = m)]
 
 # Rename columns
-setnames(ab_mean, "ab", "VC2010+OP50\n/WGA")
-setnames(cd_mean, "cd", "VC2010\n/WGA")
+setnames(ab_mean, "ab", "Replicate 1\n/WGA")
+setnames(cd_mean, "cd", "Replicate 2\n/WGA")
 setnames(PD2182_mean, "PD2182", "PD2182\n(PacBio RS II)")
 setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(PacBio Sequel)")
-setnames(k_normBy_ab_mean, "k_normBy_ab", "VC2010+OP50")
-setnames(l_normBy_cd_mean, "l_normBy_cd", "VC2010")
-setnames(k_mean, "k", "VC2010+OP50\n/native")
-setnames(l_mean, "l", "VC2010\n/native")
+setnames(k_normBy_ab_mean, "k_normBy_ab", "Replicate 1")
+setnames(l_normBy_cd_mean, "l_normBy_cd", "Replicate 2")
+setnames(k_mean, "k", "Replicate 1\n/native")
+setnames(l_mean, "l", "Replicate 2\n/native")
 
 ipd_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(ab_mean, cd_mean, k_mean, l_mean, PD2182_mean, PD2182sequel_mean))
 ipd_table[, c("position", "strand") := NULL]
