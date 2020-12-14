@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# This script tests the difference between the two sets in the following contingency table:
+# (the number of occurrence of a motif in a feature region (high IPD or low IPD)) vs. (the number of occurrence of a motif in deep_kinetics_region), and
+# (the number of bases in a feature region) vs. (the number of bases in deep_kinetics_region)
+#
+# deep_kinetics_region: region with a valid IPD count more than a threshold (default: count >= 25)
+
 MOTIF=$(cat PATTERN)
 # sample id (e.g. ab, cd)
 ID=$1
