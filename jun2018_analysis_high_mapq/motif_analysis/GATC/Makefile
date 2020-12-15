@@ -1,1 +1,1 @@
-../Makefile.motif
+../motif.makefile

@@ -35,9 +35,9 @@ tandem: $(tandem_dirs)
 .PHONY: all motif tandem $(all_dirs)
 
 $(all_dirs):
-	ln -sf ../Makefile.motif $@/Makefile
+	ln -sf ../motif.makefile $@/Makefile
 	$(MAKE) -C $@ occ_prefix=$$(cat $@/PATTERN)
 
 $(tandem_dirs):
-	ln -sf ../Makefile.motif $@/Makefile
+	ln -sf ../motif.makefile $@/Makefile
 	$(MAKE) -C $@
