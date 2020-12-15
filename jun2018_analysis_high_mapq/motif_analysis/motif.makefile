@@ -190,3 +190,9 @@ $(motif_modelPrediction_celegans): motif_modelPrediction.%.c_elegans.csv: motif_
 	Rscript ../get_motif_modelPrediction_from_ipdRatio.R $< $(word 2,$^) $@ && touch $@
 $(motif_modelPrediction_ecoli): motif_modelPrediction.%.e_coli.csv: motif_ipd.%.e_coli.csv motif_ipdratio.%.e_coli.csv
 	Rscript ../get_motif_modelPrediction_from_ipdRatio.R $< $(word 2,$^) $@ && touch $@
+
+count_occ_simple := count_occ_simple_per_motif.csv
+$(count_occ_simple): $(merged_occ)
+	../count_occ_simple_per_motif.sh > $@
+
+target += $(count_occ_simple)
