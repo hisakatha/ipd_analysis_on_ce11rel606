@@ -1,6 +1,4 @@
 library(data.table)
-#library(ggplot2)
-library(corrplot)
 
 mean_log2value <- function(kinetics) {
     if (kinetics[, .N] == 0) {
@@ -60,36 +58,15 @@ ipd_table2 <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "
 ipd_table2[, c("position", "strand") := NULL]
 ipdratio_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(k_normBy_ab_mean, l_normBy_cd_mean, k_normBy_ab_mean_ecoli, l_normBy_cd_mean_ecoli))
 ipdratio_table[, c("position", "strand") := NULL]
+ipd_table3 <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(ab_mean, cd_mean, k_mean, l_mean, PD2182sequel_mean))
+ipd_table3[, c("position", "strand") := NULL]
 
-corrplot.na <- function (input_table) {
-    if (nrow(input_table) == 0) {
-        plot.new()
-        title(sprintf("No data\nin %s", paste0(colnames(input_table), collapse = ", ")), line = -12)
-        return()
-    }
-    cors <- cor(input_table)
-    if (all(is.na(cors[upper.tri(cors)]))) {
-        plot.new()
-        title(sprintf("Not enough data for correlation matrix\nin %s", paste0(colnames(input_table), collapse = ", ")), line = -12)
-        return()
-    }
-    if (any(is.na(input_table))) {
-        corrplot(cors, method = "color", type = "upper", tl.col = "black", na.label = "NA")
-        corrplot.mixed(cors, lower = "number", upper = "color",
-            tl.col = "black", tl.cex = 0.6, lower.col = "black", na.label = "NA")
-    } else {
-        pvalues <- cor.mtest(input_table)$p
-        corrplot(cors, p.mat = pvalues, method = "color", type = "upper",
-            sig.level = c(.001, .01, .05), pch.cex = .9,
-            insig = "label_sig", pch.col = "white", tl.col = "black", na.label = "NA")
-        pvalues[lower.tri(pvalues)] <- NA
-        corrplot.mixed(cors, p.mat = pvalues, sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", lower = "number", upper = "color",
-            tl.col = "black", tl.cex = 0.6, pch.cex = 0.9, pch.col = "white", lower.col = "black", na.label = "NA")
-    }
-}
+# function: corrplot.na
+source("../plot_kinetics_correlation.corrplot.na.R")
 
-pdf("plot_kinetics_correlation.celegans_ecoli_subset1.pdf", onefile = TRUE, width = 11, height = 11)
+pdf("plot_kinetics_correlation.celegans_ecoli_subset1.pdf", onefile = TRUE, width = 8, height = 8)
 corrplot.na(ipd_table)
 corrplot.na(ipd_table2)
 corrplot.na(ipdratio_table)
+corrplot.na(ipd_table3)
 invisible(dev.off())

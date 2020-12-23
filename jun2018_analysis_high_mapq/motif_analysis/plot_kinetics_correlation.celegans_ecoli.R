@@ -1,6 +1,4 @@
 library(data.table)
-#library(ggplot2)
-library(corrplot)
 
 mean_log2value <- function(kinetics) {
     if (kinetics[, .N] == 0) {
@@ -48,16 +46,16 @@ l_mean_ecoli <- mean_log2value(l_ipd_ecoli)[, .(position, strand, l = m)]
 # Rename columns
 setnames(ab_mean, "ab", "Replicate 1\n/WGA\n/C. elegans")
 setnames(cd_mean, "cd", "Replicate 2\n/WGA\n/C. elegans")
-setnames(PD2182_mean, "PD2182", "PD2182\n(PacBio RS II)\n/C. elegans")
-setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(PacBio Sequel)\n/C. elegans")
+setnames(PD2182_mean, "PD2182", "PD2182\n(RS II)\n/native\n/C. elegans")
+setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n/native\n/C. elegans")
 setnames(k_normBy_ab_mean, "k_normBy_ab", "Replicate 1\n/C. elegans")
 setnames(l_normBy_cd_mean, "l_normBy_cd", "Replicate 2\n/C. elegans")
 setnames(k_mean, "k", "Replicate 1\n/native\n/C. elegans")
 setnames(l_mean, "l", "Replicate 2\n/native\n/C. elegans")
 setnames(ab_mean_ecoli, "ab", "Replicate 1\n/WGA\n/E. coli")
 setnames(cd_mean_ecoli, "cd", "Replicate 2\n/WGA\n/E. coli")
-setnames(PD2182_mean_ecoli, "PD2182", "PD2182\n(PacBio RS II)\n/E. coli")
-setnames(PD2182sequel_mean_ecoli, "PD2182sequel", "PD2182\n(PacBio Sequel)\n/E. coli")
+setnames(PD2182_mean_ecoli, "PD2182", "PD2182\n(RS II)\n/native\n/E. coli")
+setnames(PD2182sequel_mean_ecoli, "PD2182sequel", "PD2182\n/native\n/E. coli")
 setnames(k_normBy_ab_mean_ecoli, "k_normBy_ab", "Replicate 1\n/E. coli")
 setnames(l_normBy_cd_mean_ecoli, "l_normBy_cd", "Replicate 2\n/E. coli")
 setnames(k_mean_ecoli, "k", "Replicate 1\n/native\n/E. coli")
@@ -70,34 +68,10 @@ ipd_table2[, c("position", "strand") := NULL]
 ipdratio_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(k_normBy_ab_mean, l_normBy_cd_mean, k_normBy_ab_mean_ecoli, l_normBy_cd_mean_ecoli))
 ipdratio_table[, c("position", "strand") := NULL]
 
-corrplot.na <- function (input_table) {
-    if (nrow(input_table) == 0) {
-        plot.new()
-        title(sprintf("No data\nin %s", paste0(colnames(input_table), collapse = ", ")), line = -12)
-        return()
-    }
-    cors <- cor(input_table)
-    if (all(is.na(cors[upper.tri(cors)]))) {
-        plot.new()
-        title(sprintf("Not enough data for correlation matrix\nin %s", paste0(colnames(input_table), collapse = ", ")), line = -12)
-        return()
-    }
-    if (any(is.na(input_table))) {
-        corrplot(cors, method = "color", type = "upper", tl.col = "black", na.label = "NA")
-        corrplot.mixed(cors, lower = "number", upper = "color",
-            tl.col = "black", tl.cex = 0.6, lower.col = "black", na.label = "NA")
-    } else {
-        pvalues <- cor.mtest(input_table)$p
-        corrplot(cors, p.mat = pvalues, method = "color", type = "upper",
-            sig.level = c(.001, .01, .05), pch.cex = .9,
-            insig = "label_sig", pch.col = "white", tl.col = "black", na.label = "NA")
-        pvalues[lower.tri(pvalues)] <- NA
-        corrplot.mixed(cors, p.mat = pvalues, sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", lower = "number", upper = "color",
-            tl.col = "black", tl.cex = 0.6, pch.cex = 0.9, pch.col = "white", lower.col = "black", na.label = "NA")
-    }
-}
+# function: corrplot.na
+source("../plot_kinetics_correlation.corrplot.na.R")
 
-pdf("plot_kinetics_correlation.celegans_ecoli.pdf", onefile = TRUE, width = 11, height = 11)
+pdf("plot_kinetics_correlation.celegans_ecoli.pdf", onefile = TRUE, width = 8, height = 8)
 corrplot.na(ipd_table)
 corrplot.na(ipd_table2)
 corrplot.na(ipdratio_table)

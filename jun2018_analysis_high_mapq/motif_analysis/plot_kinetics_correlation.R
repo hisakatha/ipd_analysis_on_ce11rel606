@@ -1,6 +1,4 @@
 library(data.table)
-#library(ggplot2)
-library(corrplot)
 
 mean_log2value <- function(kinetics) {
     if (kinetics[, .N] == 0) {
@@ -28,8 +26,8 @@ l_normBy_cd_mean <- mean_log2value(l_normBy_cd_ipdratio)[, .(position, strand, l
 # Rename columns
 setnames(ab_mean, "ab", "Replicate 1\n(WGA)")
 setnames(cd_mean, "cd", "Replicate 2\n(WGA)")
-setnames(PD2182_mean, "PD2182", "PD2182\n(PacBio RS II)")
-setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(PacBio Sequel)")
+setnames(PD2182_mean, "PD2182", "PD2182\n(RS II)\n(native)")
+setnames(PD2182sequel_mean, "PD2182sequel", "PD2182\n(native)")
 setnames(k_normBy_ab_mean, "k_normBy_ab", "Replicate 1")
 setnames(l_normBy_cd_mean, "l_normBy_cd", "Replicate 2")
 
@@ -40,28 +38,10 @@ ipd_table2[, c("position", "strand") := NULL]
 ipdratio_table <- Reduce(function(x, y) merge(x, y, all = TRUE, by = c("position", "strand")), list(k_normBy_ab_mean, l_normBy_cd_mean))
 ipdratio_table[, c("position", "strand") := NULL]
 
-corrplot.na <- function (input_table) {
-    if (nrow(input_table) == 0) {
-        plot.new()
-        title(sprintf("No data in %s", paste0(colnames(input_table), collapse = ", ")))
-        return()
-    }
-    cors <- cor(input_table)
-    if (any(is.na(input_table))) {
-        corrplot(cors, method = "color", type = "upper", tl.col = "black")
-        corrplot(cors, method = "number", type = "upper", tl.col = "black")
-    } else {
-        pvalues <- cor.mtest(input_table)$p
-        corrplot(cors, p.mat = pvalues, method = "color", type = "upper",
-                 sig.level = c(.001, .01, .05), pch.cex = .9,
-                 insig = "label_sig", pch.col = "white", tl.col = "black")
-        pvalues[lower.tri(pvalues)] <- NA
-        corrplot.mixed(cors, p.mat = pvalues, sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", lower = "number", upper = "color",
-                       tl.col = "black", tl.cex = 0.8, pch.cex = 0.9, pch.col = "white", lower.col = "black")
-    }
-}
+# function: corrplot.na
+source("../plot_kinetics_correlation.corrplot.na.R")
 
-pdf("plot_kinetics_correlation.pdf", onefile = TRUE, width = 6, height = 6)
+pdf("plot_kinetics_correlation.pdf", onefile = TRUE, width = 8, height = 8)
 corrplot.na(ipd_table)
 corrplot.na(ipd_table2)
 corrplot.na(ipdratio_table)
