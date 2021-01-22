@@ -2,7 +2,7 @@ library(data.table)
 
 mean_log2value <- function(kinetics) {
     occ_threshold <- 100
-    if (kinetics[, .N] == 0 || kinetics[strand == "+", max(src)] < occ_threshold) {
+    if (kinetics[, .N] == 0 || kinetics[strand == "+", length(unique(src))] < occ_threshold) {
         data.table(position = numeric(0), strand = character(0), m = numeric(0))
     } else {
         # Use only the motif region
