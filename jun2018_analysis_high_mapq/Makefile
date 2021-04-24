@@ -8,6 +8,7 @@ SNAPSHOT_DIR := igv_snapshot
 ENRICH_BOTH_CSV := get_enriched_gene.both.summarize.csv
 ENRICH_BOTH_NAMES := get_enriched_gene.both.summarize.gene_names
 
+### Variables you have to set
 FA := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa
 FAI := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa.fai
 
@@ -172,7 +173,7 @@ $(MOD_TBI): %.tbi: %
 	tabix -p gff $<
 
 ## Deep regions
-DEEP_PREFIX := /glusterfs/hisakatha/methylation/smrtpipe/vs_ce11rel606
+DEEP_PREFIX := ..
 DEEP_BED_NAME := mapped.alignmentset.merged.high_mapq.bam.cov25
 DSLOP := $(MSLOP)
 deep_k_ab := deep_region_cov25.k_normBy_ab.bed
@@ -224,7 +225,8 @@ $(DEEP_REGION_SLOP_MERGED_FA): %.fa: %
 	bedtools getfasta -bed $< -fi $(FA) -s > $@ && touch $@
 
 ## Shuffled regions in deep regions
-SHUF_BIN := /home/hisakatha/bedtools_util/shuffle_with_strand.sh
+#SHUF_BIN := /home/hisakatha/bedtools_util/shuffle_with_strand.sh
+SHUF_BIN := shuffle_with_strand.sh
 MOD_SHUF := $(MOD:.gff=.shuffled.gff)
 MOD_SHUF_in_k_normBy_ab := $(filter modifications.k_normBy_ab.%,$(MOD_SHUF))
 $(MOD_SHUF_in_k_normBy_ab): %.shuffled.gff: %.gff $(deep_k_ab)
