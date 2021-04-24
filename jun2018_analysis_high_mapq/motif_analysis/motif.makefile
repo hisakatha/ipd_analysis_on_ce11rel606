@@ -5,6 +5,10 @@ ifndef PATTERN
 $(error PATTERN is undefined)
 endif
 
+### Variables you have to set
+REF := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa
+###
+
 occ_prefix := motif_occ
 
 motif_ipds := motif_ipd.ab.csv motif_ipd.cd.csv
@@ -61,9 +65,11 @@ all: $$(target)
 # pattern occurrence for background
 occ_background := $(occ_prefix).ab.bed $(occ_prefix).cd.bed $(occ_prefix).ce11rel606.bed $(occ_prefix).k_normBy_ab.bed $(occ_prefix).l_normBy_cd.bed $(occ_prefix).PD2182.bed $(occ_prefix).PD2182sequel.bed
 occ_background += $(occ_prefix).abcd.bed $(occ_prefix).kl.bed $(occ_prefix).kl_normBy_abcd.bed
-$(occ_prefix).ce11rel606.bed: /glusterfs/hisakatha/ce11rel606/ce11rel606.fa
+$(occ_prefix).ce11rel606.bed: $(REF)
 	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
-DIR := /glusterfs/hisakatha/methylation/smrtpipe/vs_ce11rel606
+# Root directory for sample analyses
+#DIR := /glusterfs/hisakatha/methylation/smrtpipe/vs_ce11rel606
+DIR := ../../..
 FILE := mapped.alignmentset.merged.high_mapq.bam.cov25.slop20.bed.fa
 $(occ_prefix).ab.bed: $(DIR)/jun2018_ab_pcr_vc2010_op50_no_chunk/$(FILE)
 	seqkit locate --bed -i -d -p $(PATTERN) $< > $@ && touch $@
