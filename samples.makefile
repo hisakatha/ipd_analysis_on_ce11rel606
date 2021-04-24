@@ -4,10 +4,30 @@ BASE := mapped.alignmentset
 INPUTS := $(wildcard output/tasks/pbalign.tasks.pbalign-*/$(BASE).bam)
 COV_THRES ?= 25
 MAPQ_THRES ?= 128
+
+### Variables you have to set
+# Relative paths should be based on the sample directories
+
 REF := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa
 FAI := /glusterfs/hisakatha/ce11rel606/ce11rel606.fa.fai
 pbindex := /bio/package/pacbio/smrtlink/smrtcmds/bin/pbindex
+IGVT := /home/hisakatha/IGVTools/igvtools
 
+# `cargo build` in a clone of https://github.com/hisakatha/compare-mapq-between-two-sets
+comp_bin := ~/compare_mapq_between_two_sets/target/release/compare_mapq_between_two_sets
+
+# `cargo build` in a clone of https://github.com/hisakatha/extract-bam-unique-alignment
+extract_bin := ~/extract_bam_unique_alignment/target/release/extract_bam_unique_alignment
+
+# UCSC Utilities (https://genome.ucsc.edu/util.html)
+bedg2bw := /home/hisakatha/ucsc/bedGraphToBigWig
+
+# samtools doesn't output coverage 0; bedtools does.
+BEDT := /home/hisakatha/bedtools2/bin/bedtools
+
+###
+
+PLOT_SCRIPT := ../plot_bam_depth.R
 MERGED := $(BASE).merged.bam
 BAI := $(MERGED).bai
 MERGED_MD := $(BASE).merged.md.bam
@@ -103,14 +123,12 @@ $(BAI_MD): $(MERGED_MD)
 $(NAME_SORTED): $(MERGED)
 	samtools sort -n -@ 8 $< > $@
 
-comp_bin := ~/compare_mapq_between_two_sets/target/release/compare_mapq_between_two_sets
 $(MAPQ_COMP_CSV): $(NAME_SORTED)
 	$(comp_bin) $< celegans chrI,chrII,chrIII,chrIV,chrV,chrX,chrM ecoli E._coli_REL606 > $@ 2> $(@:.csv=.log)
 
 $(BOTH_HIGH_MAPQ_READ): $(MAPQ_COMP_CSV)
 	Rscript ../extract_both_high_mapq.R $< $@
 
-extract_bin := ~/extract_bam_unique_alignment/target/release/extract_bam_unique_alignment
 $(HQ_UNIQUE): $(NAME_SORTED)
 	$(extract_bin) $< $(MAPQ_THRES) $@
 
@@ -123,7 +141,7 @@ $(HQ_UNIQUE_SORTED_BAI): $(HQ_UNIQUE_SORTED)
 $(HQ_UNIQUE_SORTED_PBI): $(HQ_UNIQUE_SORTED)
 	$(pbindex) $<
 
-aln_len_bin := /glusterfs/hisakatha/methylation/smrtpipe/vs_ce11rel606/get_alignment_length.sh
+aln_len_bin := ../get_alignment_length.sh
 $(ALIGNMENT_LEN): $(MERGED)
 	samtools view -@ 4 $< | $(aln_len_bin) > $@
 
@@ -135,9 +153,6 @@ $(MERGED_STATS): $(MERGED)
 ## $SAMT view -b -F 0x10 $BASE.merged.bam > $BASE.merged.forward.bam
 ## $SAMT depth $BASE.merged.reverse.bam > $BASE.merged.reverse.bam.depth
 ## $SAMT depth $BASE.merged.forward.bam > $BASE.merged.forward.bam.depth
-
-# samtools doesn't output coverage 0; bedtools does.
-BEDT := /home/hisakatha/bedtools2/bin/bedtools
 
 # 1-based coverage info
 $(FDEPTH): $(MERGED)
@@ -155,14 +170,12 @@ $(HQ_UNIQUE_SORTED_FDEPTH): $(HQ_UNIQUE_SORTED)
 $(HQ_UNIQUE_SORTED_RDEPTH): $(HQ_UNIQUE_SORTED)
 	$(BEDT) genomecov -ibam $< -d -strand - > $@
 
-PLOT_SCRIPT := /home/hisakatha/glusterfs/methylation/svr_ipd/plot_bam_depth.R
-
 $(DEPTH_PDF): $(FDEPTH) $(RDEPTH)
-	Rscript ${PLOT_SCRIPT} $?
+	Rscript ${PLOT_SCRIPT} $^
 
 # coverage info in bedgraph format (0-based)
 $(BEDGRAPH): $(MERGED)
-	$(BEDT) genomecov -ibam $? -bga > $@
+	$(BEDT) genomecov -ibam $^ -bga > $@
 $(FWD_BEDGRAPH): $(MERGED)
 	$(BEDT) genomecov -ibam $< -bga -strand + > $@
 $(REV_BEDGRAPH): $(MERGED)
@@ -183,7 +196,7 @@ $(HQ_REV_DEEP_REGION): $(HQ_REV_BEDGRAPH)
 
 $(BIGWIG): $(BEDGRAPH)
 	cat $< | grep -v "E._coli_REL606" > $<.ce11 && \
-	/home/hisakatha/ucsc/bedGraphToBigWig $<.ce11 $(FAI) $@ && \
+	$(bedg2bw) $<.ce11 $(FAI) $@ && \
 	rm $<.ce11
 
 $(DEEP_REGION): $(FWD_DEEP_REGION) $(REV_DEEP_REGION)
@@ -223,7 +236,7 @@ $(BEDGRAPH_SORTED): $(BEDGRAPH)
 	$(BEDT) sort -i $< > $@
 
 $(BIGWIG_ALL): $(BEDGRAPH_SORTED)
-	/home/hisakatha/ucsc/bedGraphToBigWig $< $(FAI) $@
+	$(bedg2bw) $< $(FAI) $@
 
 $(HQ): $(MERGED)
 	samtools view -q 128 -b $< > $@
@@ -235,7 +248,7 @@ $(HQ_BEDGRAPH_SORTED): $(HQ_BEDGRAPH)
 	$(BEDT) sort -i $< > $@
 
 $(HQ_BIGWIG_ALL): $(HQ_BEDGRAPH_SORTED)
-	/home/hisakatha/ucsc/bedGraphToBigWig $< $(FAI) $@
+	$(bedg2bw) $< $(FAI) $@
 
 $(HQ_ALIGNMENT_LEN): $(HQ)
 	samtools view -@ 4 $< | $(aln_len_bin) > $@
@@ -243,7 +256,6 @@ $(HQ_ALIGNMENT_LEN): $(HQ)
 $(HQ_MERGED_STATS): $(HQ)
 	samtools stats -@ 4 $< > $@
 
-IGVT := /home/hisakatha/IGVTools/igvtools
 $(TDF): $(MERGED)
 	$(IGVT) count -z 9 -w 1 $< $@ $(FAI)
 
