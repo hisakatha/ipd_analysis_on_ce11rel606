@@ -368,13 +368,19 @@ l_comparison_plots_outside10 <- list()
 PD2182sequel_comparison_plots <- list()
 PD2182sequel_comparison_plots_outside20 <- list()
 PD2182sequel_comparison_plots_outside10 <- list()
-# Comparison of C. elegans WGA and native
+# Comparison of WGA and native
 ab_k_comparison_plots <- list()
 ab_k_comparison_plots_outside20 <- list()
 ab_k_comparison_plots_outside10 <- list()
 cd_l_comparison_plots <- list()
 cd_l_comparison_plots_outside20 <- list()
 cd_l_comparison_plots_outside10 <- list()
+ab_k_ecoli_comparison_plots <- list()
+ab_k_ecoli_comparison_plots_outside20 <- list()
+ab_k_ecoli_comparison_plots_outside10 <- list()
+cd_l_ecoli_comparison_plots <- list()
+cd_l_ecoli_comparison_plots_outside20 <- list()
+cd_l_ecoli_comparison_plots_outside10 <- list()
 
 ab_cd_comparison_plots <- list()
 ab_cd_comparison_plots_outside20 <- list()
@@ -509,19 +515,33 @@ for (motif_dir in motifs) {
         legend_plot_comparison <- get_legend(ab_comparison_plots_tmp[["comparison"]])
     }
 
-    type1_text <- "WGA"
-    type2_text <- "native"
+    type1_text <- "replicate 1/WGA/C. elegans"
+    type2_text <- "replicate 1/native/C. elegans"
     ab_k_comparison_plots_tmp <- plot_motif_kinetics_comparison(dimers_summary_ab_celegans, dimers_summary_k_celegans, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
     ab_k_comparison_plots[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison"]]
     ab_k_comparison_plots_outside20[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside20"]]
     ab_k_comparison_plots_outside10[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside10"]]
+    if (is.null(legend_plot_wga_native_comparison)) {
+        legend_plot_wga_native_comparison <- get_legend(ab_k_comparison_plots_tmp[["comparison"]])
+    }
+    type1_text <- "replicate 2/WGA/C. elegans"
+    type2_text <- "replicate 2/native/C. elegans"
     cd_l_comparison_plots_tmp <- plot_motif_kinetics_comparison(dimers_summary_cd_celegans, dimers_summary_l_celegans, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
     cd_l_comparison_plots[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison"]]
     cd_l_comparison_plots_outside20[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside20"]]
     cd_l_comparison_plots_outside10[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside10"]]
-    if (is.null(legend_plot_wga_native_comparison)) {
-        legend_plot_wga_native_comparison <- get_legend(ab_k_comparison_plots_tmp[["comparison"]])
-    }
+    type1_text <- "replicate 1/WGA/E. coli"
+    type2_text <- "replicate 1/native/E. coli"
+    ab_k_ecoli_comparison_plots_tmp <- plot_motif_kinetics_comparison(dimers_summary_ab_ecoli, dimers_summary_k_ecoli, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 1/E. coli", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_k_ecoli_comparison_plots[[motif_dir]] <- ab_k_ecoli_comparison_plots_tmp[["comparison"]]
+    ab_k_ecoli_comparison_plots_outside20[[motif_dir]] <- ab_k_ecoli_comparison_plots_tmp[["comparison_outside20"]]
+    ab_k_ecoli_comparison_plots_outside10[[motif_dir]] <- ab_k_ecoli_comparison_plots_tmp[["comparison_outside10"]]
+    type1_text <- "replicate 2/WGA/E. coli"
+    type2_text <- "replicate 2/native/E. coli"
+    cd_l_ecoli_comparison_plots_tmp <- plot_motif_kinetics_comparison(dimers_summary_cd_ecoli, dimers_summary_l_ecoli, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "replicate 2/E. coli", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_l_ecoli_comparison_plots[[motif_dir]] <- cd_l_ecoli_comparison_plots_tmp[["comparison"]]
+    cd_l_ecoli_comparison_plots_outside20[[motif_dir]] <- cd_l_ecoli_comparison_plots_tmp[["comparison_outside20"]]
+    cd_l_ecoli_comparison_plots_outside10[[motif_dir]] <- cd_l_ecoli_comparison_plots_tmp[["comparison_outside10"]]
 
     type1_text <- "replicate 1/WGA/C. elegans"
     type2_text <- "replicate 2/WGA/C. elegans"
@@ -875,11 +895,23 @@ pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.sel
 plots <- k_l_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
 invisible(dev.off())
+pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_k_celegans.pdf", width = pdf_width, height = pdf_height_select1)
+plots <- ab_k_comparison_plots_outside10[motifs_select1]
+print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.cd_l_celegans.pdf", width = pdf_width, height = pdf_height_select1)
+plots <- cd_l_comparison_plots_outside10[motifs_select1]
+print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_cd_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- ab_cd_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
 invisible(dev.off())
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.k_l_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- k_l_ecoli_comparison_plots_outside10[motifs_select1]
+print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_k_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
+plots <- ab_k_ecoli_comparison_plots_outside10[motifs_select1]
+print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.cd_l_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
+plots <- cd_l_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
 invisible(dev.off())
