@@ -18,16 +18,17 @@ plot.enrichment(d, "abcd", ylab_text)
 #plot.intron_details(d, "abcd")
 #plot.enrichment(d, "intersection of callable k_normBy_ab and l_normBy_cd")
 plot.enrichment(d, "PD2182", ylab_text)
-plot.enrichment(d, "PD2182sequel", ylab_text)
+#plot.enrichment(d, "PD2182sequel", ylab_text)
 
 plot.enrichment.dual_facet(d, "ab", ylab_text)
 plot.enrichment.dual_facet(d, "cd", ylab_text)
 plot.enrichment.dual_facet(d, "abcd", ylab_text)
 plot.enrichment.dual_facet(d, "PD2182", ylab_text)
-plot.enrichment.dual_facet(d, "PD2182sequel", ylab_text)
+#plot.enrichment.dual_facet(d, "PD2182sequel", ylab_text)
 invisible(dev.off())
 
 d <- d[sample != "abcd"]
+d <- d[sample != "PD2182sequel"]
 pdf("high_ipd_enrichment.plot.all_samples.pdf", height = 8, width = 12, onefile = TRUE)
 plot.enrichment.dual_facet.all_sample(d, ylab_text)
 invisible(dev.off())

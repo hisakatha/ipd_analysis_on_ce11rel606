@@ -29,6 +29,7 @@ ylab_text <- "Fold change of fraction of high IPD bases in each region"
 
 d <- d[sample != "abcd"]
 d <- d[sample != "PD2182"]
+d <- d[sample != "PD2182sequel"]
 pdf("high_ipd_enrichment.c_elegans.plot.all_samples.pdf", height = 8, width = 15, onefile = TRUE)
 plot.enrichment.dual_facet.all_sample.v2(d, ylab_text)
 invisible(dev.off())
