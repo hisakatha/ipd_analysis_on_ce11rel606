@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<pipeline-template-preset id="MyPreset">
+
+    <!-- Pbsmrtpipe Engine Options -->
+    <options>
+        <!-- Enable Distributed Mode -->
+        <option id="pbsmrtpipe.options.distributed_mode">
+            <value>True</value>
+        </option>
+        <!-- Enable file chunking -->
+        <option id="pbsmrtpipe.options.chunk_mode">
+            <value>True</value>
+        </option>
+         <!-- This will be disabled if pbsmrtpipe.options.distributed_mode is False -->
+        <option id="pbsmrtpipe.options.cluster_manager" >
+           <value>/bio/package/pacbio/smrtlink/userdata/generated/config/jms_templates</value>
+        </option>
+
+        <!-- Total Number of slocs/processors a pbsmrtpipe instance will use -->
+        <option id="pbsmrtpipe.options.max_total_nproc" >
+            <value>1000</value>
+        </option>
+
+        <!-- MAX Number of Processors per Task that will be used -->
+        <option id="pbsmrtpipe.options.max_nproc">
+            <value>7</value>
+        </option>
+
+        <!-- MAX Number of Chunks per Chunkable Task that will be used -->
+        <option id="pbsmrtpipe.options.max_nchunks">
+            <value>24</value>
+        </option>
+
+        <!-- MAX Number of Workers -->
+        <option id="pbsmrtpipe.options.max_nworkers">
+            <value>100</value>
+        </option>
+
+        <!-- Temporary directory (on the execution nodes) -->
+        <option id="pbsmrtpipe.options.tmp_dir">
+            <value>/bio/package/pacbio/smrtlink/userdata/tmp_dir</value>
+        </option>
+
+        <!-- Status Progress URL -->
+        <option id="pbsmrtpipe.options.progress_status_url">
+            <value></value>
+        </option>
+
+        <!-- Flag to immediately exit if a task fails -->
+        <option id="pbsmrtpipe.options.exit_on_failure">
+            <value>False</value>
+        </option>
+
+        <!-- Flag to enable DEBUG level in master.log and stdout -->
+        <option id="pbsmrtpipe.options.debug_mode">
+            <value>False</value>
+        </option>
+
+    </options>
+
+    <!-- Default override for task options -->
+    <task-options />
+
+</pipeline-template-preset>
