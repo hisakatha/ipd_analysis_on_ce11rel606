@@ -7,7 +7,7 @@
 #$ -N ipdSummary
 #$ -pe smp 24
 
-. /glusterfs/hisakatha/methylation/smrtpipe/setup.sh
+export PATH="/bio/package/pacbio/smrtlink/smrtcmds/bin:$PATH"
 
 fname="ipd_summary_high_mapq_unique"
 #INPUT=mapped.alignmentset.merged.sorted_by_name.hq_unique.sorted.bam

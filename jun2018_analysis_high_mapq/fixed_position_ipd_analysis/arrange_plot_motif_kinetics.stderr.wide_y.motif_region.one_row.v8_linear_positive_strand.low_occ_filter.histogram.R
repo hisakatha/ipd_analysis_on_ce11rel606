@@ -1,0 +1,1024 @@
+library(data.table)
+library(ggplot2)
+library(cowplot)
+
+welch.t.pvalue <- function(a_mean, a_variance, a_size, b_mean, b_variance, b_size) {
+    a_sq <- (a_variance ^ 2) / a_size
+    b_sq <- (b_variance ^ 2) / b_size
+    t_stat <- (a_mean - b_mean) / sqrt(a_sq + b_sq)
+    dof <- ((a_sq + b_sq) ^ 2) / ((a_sq ^ 2) / (a_size - 1) + (b_sq ^ 2) / (b_size - 1))
+    # Two-sided p-value
+    pt(-abs(t_stat), dof) * 2
+}
+
+get_integer_breaks <- function(values) {
+    max_values <- max(values)
+    min_values <- min(values)
+    values_range <- max_values - min_values + 1
+    fixed_point <- 1
+    if (values_range <= 10) {
+        return(min_values:max_values)
+    } else if (values_range <= 25) {
+        step <- 3
+    } else {
+        step <- 5
+    }
+    return(seq(min_values + (fixed_point - min_values) %% step, max_values, by = step))
+}
+
+#correlation_output_prefix <- "arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.correlation"
+#correlation_output2 <- paste0(correlation_output_prefix, ".two_sets.csv")
+#invisible(file.remove(correlation_output2))
+
+plot_motif_kinetics_comparison <- function(kinetics1_data, kinetics2_data, type1, type2, title_text, motif_string, sample_name, ylab_text, global_mean, global_var, global_size){
+    kinetics1_occ <- ifelse(kinetics1_data[, .N] == 0, 0, kinetics1_data[, max(src)])
+    kinetics2_occ <- ifelse(kinetics2_data[, .N] == 0, 0, kinetics2_data[, max(src)])
+    occ_threshold <- 3
+    if (kinetics1_occ < occ_threshold & kinetics2_occ < occ_threshold) {
+        g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
+            xlab("") + ylab("") + theme(axis.text = element_blank(), axis.ticks = element_blank(), panel.grid = element_blank())
+        return(list("kinetics1" = g1, "kinetics1_outside20" = g1, "kinetics1_outside10" = g1,
+                    "comparison" = g1, "comparison_outside20" = g1, "comparison_outside10" = g1))
+    }
+    if (kinetics1_occ < occ_threshold) {
+        kinetics1_data <- kinetics1_data[FALSE]
+        kinetics1_occ <- NA
+    } else {
+        kinetics1_data <- kinetics1_data[strand == "+"]
+    }
+    if (kinetics2_occ < occ_threshold) {
+        kinetics2_data <- kinetics2_data[FALSE]
+        kinetics2_occ <- NA
+    } else {
+        kinetics2_data <- kinetics2_data[strand == "+"]
+    }
+    position_offset <- 20
+    kinetics1_data[, "region" := list(ifelse(substr(label, 1, 1) == "s", "Upstream", ifelse(substr(label, 1, 1) == "m", "Motif", ifelse(substr(label, 1, 1) == "e", "Downstream", "Unknown"))))]
+    kinetics1_data[, "position" := .(position - position_offset)]
+    kinetics2_data[, "region" := list(ifelse(substr(label, 1, 1) == "s", "Upstream", ifelse(substr(label, 1, 1) == "m", "Motif", ifelse(substr(label, 1, 1) == "e", "Downstream", "Unknown"))))]
+    kinetics2_data[, "position" := .(position - position_offset)]
+    kinetics1_data[, "type" := .(type1)]
+    #kinetics1_summary[, "pvalue" := list(welch.t.pvalue(mean, var, N, global_mean, global_var, global_size))]
+    kinetics1_data$strand <- factor(kinetics1_data$strand, levels = c("+", "-"))
+    kinetics1_data$region <- factor(kinetics1_data$region, levels = c("Upstream", "Motif", "Downstream", "Unknown"))
+    kinetics2_data[, "type" := .(type2)]
+    #kinetics2_summary[, "pvalue" := list(welch.t.pvalue(mean, var, N, global_mean, global_var, global_size))]
+    kinetics2_data$strand <- factor(kinetics2_data$strand, levels = c("+", "-"))
+    kinetics2_data$region <- factor(kinetics2_data$region, levels = c("Upstream", "Motif", "Downstream", "Unknown"))
+    if (kinetics1_data[region == "Motif", .N] == 0 & kinetics2_data[region == "Motif", .N] == 0) {
+        g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "NA"), size = 12) +
+            xlab("") + ylab("") + theme(axis.text = element_blank(), axis.ticks = element_blank(), panel.grid = element_blank())
+        return(list("kinetics1" = g1, "kinetics1_outside20" = g1, "kinetics1_outside10" = g1,
+                    "comparison" = g1, "comparison_outside20" = g1, "comparison_outside10" = g1))
+    }
+    merged_data <- rbind(kinetics1_data, kinetics2_data)
+    merged_data$type <- factor(merged_data$type, levels = c(type1, type2))
+    #if (kinetics1_summary[region == "Motif", .N] > 3 & kinetics2_summary[region == "Motif", .N] > 3) {
+    #    merged_summary_table <- merge(kinetics1_summary, kinetics2_summary, by = c("position", "strand", "label", "region"), all = TRUE, suffixes = c(".kinetics1", ".kinetics2"))
+    #    mean_cor <- cor(merged_summary_table[region == "Motif", mean.kinetics1], merged_summary_table[region == "Motif", mean.kinetics2], use = "pair")
+    #}else{
+    #    mean_cor <- NA
+    #}
+    #if(is.na(mean_cor)){
+    #    mean_cor_p <- NA
+    #}else{
+    #    mean_cor_p <- cor.test(merged_summary_table[region == "Motif", mean.kinetics1], merged_summary_table[region == "Motif", mean.kinetics2])$p.value
+    #}
+    value_min <- min(kinetics1_data[, value], kinetics2_data[, value])
+    value_max <- max(kinetics1_data[, value], kinetics2_data[, value])
+    stopifnot(length(value_max) == 1)
+    #ylim_lower <- ifelse(mean_min > (2 ** -1.9), 2 ** -2, 0)
+    #ylim_upper <- ifelse(mean_max < (2 ** 2.2), 2 ** 2.3, ifelse(mean_max < (2 ** 3.3), 2 ** 3.4, mean_max + (2 ** 0.2)))
+    ylim_lower <- 0
+    ylim_upper <- ifelse(value_max < 2.5, 3, value_max + 1)
+    legend_face <- ifelse(type1 == "C. elegans", "italic", "plain")
+    position_labels <- as.character((1 - position_offset):(nchar(motif_string) + position_offset))
+    position_labels[(position_offset + 1):(position_offset + nchar(motif_string))] <- unlist(strsplit(motif_string, ""))
+    names(position_labels) <- (1 - position_offset):(nchar(motif_string) + position_offset)
+    # g1
+    plot_data <- kinetics1_data[region == "Motif"]
+    annot_x_rate <- 0.7
+    annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
+    g1 <- ggplot(plot_data, aes(y = value)) +
+        geom_histogram(aes(y = value)) +
+        facet_grid(.~position, labeller = labeller(position = position_labels)) +
+        theme(panel.grid = element_blank(), panel.border = element_rect(fill = NA, color = "gray"), panel.background = element_rect(fill = NA), plot.subtitle = element_text(size = 6)) +
+        ylab(ylab_text) +
+        geom_hline(yintercept = global_mean, linetype = "dashed", size = 0.1) +
+        coord_cartesian(ylim = c(ylim_lower, ylim_upper))
+        #theme(axis.title.x = element_blank()) +
+        #scale_x_continuous(breaks = 1:nchar(motif_string), labels = unlist(strsplit(motif_string, ""))) +
+        #theme(axis.ticks.x = element_blank()) +
+        #geom_text(aes(y = Inf, label = format(pvalue, digits = 3, scientific = T)), show.legend = F, angle = 90, hjust = 1.2, size = 2, color = "black")
+        #scale_x_continuous(breaks = kinetics_summary$position, labels = kinetics_summary$label)
+        #scale_x_continuous(breaks = 1:kinetics_summary[,max(position)], labels = kinetics_summary$label)
+    #g1_ret <- g1 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\n#occ = %d", title_text, sample_name, kinetics_occ), size = 2)
+    g1_ret <- g1
+    # g1_outside20
+    end_pos <- max(kinetics1_data[, position], kinetics2_data[, position])
+    annot_x <- quantile(c(kinetics1_data[, min(position)], kinetics1_data[, max(position)]), annot_x_rate, names = FALSE)
+    g1_outside20 <- g1 %+% kinetics1_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
+        theme(axis.text.x = element_text(size = 5))
+    # g1_outside10
+    plot_data <- kinetics1_data[-9 <= position & position <= end_pos - 10]
+    annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
+    g1_outside10 <- g1 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
+    # g2
+    plot_data <- merged_data[region == "Motif"]
+    annot_x_rate <- 0.7
+    annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
+    g2 <- ggplot(plot_data, aes(y = value, fill = type)) +
+        geom_histogram(position = "identity", alpha = 0.5) +
+        facet_grid(.~position, labeller = labeller(position = position_labels)) +
+        theme(panel.grid = element_blank(), panel.border = element_rect(fill = NA, color = "gray"), panel.background = element_rect(fill = NA), plot.subtitle = element_text(size = 6)) +
+        theme(legend.position = c(1,1), legend.justification = c(1,0.85), legend.background = element_blank(), legend.title = element_blank()) +
+        ylab(ylab_text) +
+        theme(legend.text = element_text(size = 9, face = legend_face), legend.key.size = unit(0.9, "lines")) +
+        geom_hline(yintercept = global_mean, linetype = "dashed", size = 0.1) +
+        coord_cartesian(ylim = c(ylim_lower, ylim_upper)) +
+        scale_colour_brewer(palette = "Set1", limits = c(type1, type2), labels = c(type1, type2), drop = FALSE, name = NULL)
+        #scale_x_continuous(breaks = get_integer_breaks(plot_data[, position])) +
+    #g2_ret <- g2 + annotate("text", x = annot_x, y = Inf, hjust = "left", vjust = 1.1, label = sprintf("%s,\n%s,\nr = %.3g (p = %.3g),\n#occ (%s) = %d,\n#occ (%s) = %d", title_text, sample_name, mean_cor, mean_cor_p, type1, kinetics1_occ, type2, kinetics2_occ), size = 2)
+    #fwrite(data.table(motif_string = title_text, sample_name = sample_name, mean_cor = mean_cor, mean_cor_p = mean_cor_p, type1 = type1, kinetics1_occ = kinetics1_occ, type2 = type2, kinetics2_occ = kinetics2_occ), file = correlation_output2, append = TRUE)
+    g2_ret <- g2
+    # g2_outside20
+    annot_x <- quantile(c(merged_data[, min(position)], merged_data[, max(position)]), annot_x_rate, names = FALSE)
+    end_pos <- max(kinetics1_data[, position], kinetics2_data[, position])
+    g2_outside20 <- g2 %+% merged_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1) +
+        theme(axis.text.x = element_text(size = 5))
+    # g2_outside10
+    plot_data <- merged_data[-9 <= position & position <= end_pos - 10]
+    annot_x <- quantile(c(plot_data[, min(position)], plot_data[, max(position)]), annot_x_rate, names = FALSE)
+    g2_outside10 <- g2 %+% plot_data + geom_vline(xintercept = c(0.5, end_pos - 19.5), linetype = "dashed", size = 0.1)
+    return(list("kinetics1" = g1_ret, "kinetics1_outside20" = g1_outside20, "kinetics1_outside10" = g1_outside10,
+                "comparison" = g2_ret, "comparison_outside20" = g2_outside20, "comparison_outside10" = g2_outside10))
+}
+
+motifs_high_ipd <- c("greer_pacbio_m6A_cov50", "greer_pacbio_orig_m6A_cov50")
+motif_dirs <- unique(motifs_high_ipd)
+
+motif_titles <- list("greer_pacbio_m6A_cov50" = "Greer et al. P6-C4 data 6mA position", "greer_pacbio_orig_m6A_cov50" = "Greer et al. mixed data 6mA position")
+motif_strings <- list("greer_pacbio_m6A_cov50" = "A", "greer_pacbio_orig_m6A_cov50" = "A")
+
+lookup_motif_title <- function(motif_dir){
+    if(is.null(motif_titles[[motif_dir]])){
+        return(motif_dir)
+    }else{
+        return(motif_titles[[motif_dir]])
+    }
+}
+
+lookup_motif_string <- function(motif_dir){
+    if(is.null(motif_strings[[motif_dir]])){
+        return(motif_dir)
+    }else{
+        return(motif_strings[[motif_dir]])
+    }
+}
+
+# These constants were derived from deep kinetics regions (valid IPD count >= 25) in C. elegans (kinetics_stats.c_elegans.degenerate.csv).
+N_ab_deep_IPD_mean <- 1.0016125417229
+N_ab_deep_IPD_var <- 0.530361
+N_ab_deep_IPD_size <- 24896768
+N_cd_deep_IPD_mean <- 1.00697069898825
+N_cd_deep_IPD_var <- 0.499876
+N_cd_deep_IPD_size <- 43864792
+N_k_deep_IPD_mean <- 1.00987841064884
+N_k_deep_IPD_var <- 0.457901
+N_k_deep_IPD_size <- 132281513
+N_l_deep_IPD_mean <- 1.00898633147954
+N_l_deep_IPD_var <- 0.453772
+N_l_deep_IPD_size <- 138935492
+N_abcd_deep_IPD_mean <- 1.00256291861053
+N_abcd_deep_IPD_var <- 0.48004
+N_abcd_deep_IPD_size <- 61748820
+N_kl_deep_IPD_mean <- 1.00412118937343
+N_kl_deep_IPD_var <- 0.403984
+N_kl_deep_IPD_size <- 187204127
+N_PD2182_deep_IPD_mean <- 1.02215998241509
+N_PD2182_deep_IPD_var <- 0.551352
+N_PD2182_deep_IPD_size <- 1223970
+N_PD2182sequel_deep_IPD_mean <- 1.01456759843303
+N_PD2182sequel_deep_IPD_var <- 0.622626
+N_PD2182sequel_deep_IPD_size <- 165136774
+
+# These constants were derived from deep kinetics regions (valid IPD count >= 25) in E. coli (kinetics_stats.e_coli.degenerate.csv).
+N_ab_ecoli_deep_IPD_mean <- 1.01346318345922
+N_ab_ecoli_deep_IPD_var <- 0.728936
+N_ab_ecoli_deep_IPD_size <- 122845
+N_cd_ecoli_deep_IPD_mean <- 1.02309653184721
+N_cd_ecoli_deep_IPD_var <- 0.768162
+N_cd_ecoli_deep_IPD_size <- 158493
+N_k_ecoli_deep_IPD_mean <- 1.04731125085699
+N_k_ecoli_deep_IPD_var <- 1.64757
+N_k_ecoli_deep_IPD_size <- 80895
+N_l_ecoli_deep_IPD_mean <- 1.06510695483014
+N_l_ecoli_deep_IPD_var <- 1.56012
+N_l_ecoli_deep_IPD_size <- 43370
+N_abcd_ecoli_deep_IPD_mean <- 1.01803061115873
+N_abcd_ecoli_deep_IPD_var <- 0.737676
+N_abcd_ecoli_deep_IPD_size <- 283684
+N_kl_ecoli_deep_IPD_mean <- 1.0534403280846
+N_kl_ecoli_deep_IPD_var <- 1.58304
+N_kl_ecoli_deep_IPD_size <- 133883
+N_PD2182_ecoli_deep_IPD_mean <- NA
+N_PD2182_ecoli_deep_IPD_var <- 0
+N_PD2182_ecoli_deep_IPD_size <- 0
+N_PD2182sequel_ecoli_deep_IPD_mean <- NA
+N_PD2182sequel_ecoli_deep_IPD_var <- 0
+N_PD2182sequel_ecoli_deep_IPD_size <- 0
+
+ab_plots <- list()
+cd_plots <- list()
+PD2182sequel_plots <- list()
+k_plots <- list()
+l_plots <- list()
+abcd_plots <- list()
+kl_plots <- list()
+ab_plots_with_estimate <- list()
+cd_plots_with_estimate <- list()
+PD2182sequel_plots_with_estimate <- list()
+k_plots_with_estimate <- list()
+l_plots_with_estimate <- list()
+abcd_plots_with_estimate <- list()
+kl_plots_with_estimate <- list()
+ab_plots_outside20 <- list()
+cd_plots_outside20 <- list()
+PD2182sequel_plots_outside20 <- list()
+k_plots_outside20 <- list()
+l_plots_outside20 <- list()
+abcd_plots_outside20 <- list()
+kl_plots_outside20 <- list()
+ab_plots_outside10 <- list()
+cd_plots_outside10 <- list()
+PD2182sequel_plots_outside10 <- list()
+k_plots_outside10 <- list()
+l_plots_outside10 <- list()
+abcd_plots_outside10 <- list()
+kl_plots_outside10 <- list()
+ab_plots_with_estimate_outside20 <- list()
+cd_plots_with_estimate_outside20 <- list()
+PD2182sequel_plots_with_estimate_outside20 <- list()
+k_plots_with_estimate_outside20 <- list()
+l_plots_with_estimate_outside20 <- list()
+abcd_plots_with_estimate_outside20 <- list()
+kl_plots_with_estimate_outside20 <- list()
+ab_plots_with_estimate_outside10 <- list()
+cd_plots_with_estimate_outside10 <- list()
+PD2182sequel_plots_with_estimate_outside10 <- list()
+k_plots_with_estimate_outside10 <- list()
+l_plots_with_estimate_outside10 <- list()
+abcd_plots_with_estimate_outside10 <- list()
+kl_plots_with_estimate_outside10 <- list()
+ab_ecoli_plots <- list()
+ab_ecoli_plots_with_estimate <- list()
+ab_ecoli_plots_outside20 <- list()
+ab_ecoli_plots_outside10 <- list()
+ab_ecoli_plots_with_estimate_outside20 <- list()
+ab_ecoli_plots_with_estimate_outside10 <- list()
+cd_ecoli_plots <- list()
+cd_ecoli_plots_with_estimate <- list()
+cd_ecoli_plots_outside20 <- list()
+cd_ecoli_plots_outside10 <- list()
+cd_ecoli_plots_with_estimate_outside20 <- list()
+cd_ecoli_plots_with_estimate_outside10 <- list()
+k_ecoli_plots <- list()
+k_ecoli_plots_with_estimate <- list()
+k_ecoli_plots_outside20 <- list()
+k_ecoli_plots_outside10 <- list()
+k_ecoli_plots_with_estimate_outside20 <- list()
+k_ecoli_plots_with_estimate_outside10 <- list()
+l_ecoli_plots <- list()
+l_ecoli_plots_with_estimate <- list()
+l_ecoli_plots_outside20 <- list()
+l_ecoli_plots_outside10 <- list()
+l_ecoli_plots_with_estimate_outside20 <- list()
+l_ecoli_plots_with_estimate_outside10 <- list()
+PD2182sequel_ecoli_plots <- list()
+PD2182sequel_ecoli_plots_with_estimate <- list()
+PD2182sequel_ecoli_plots_outside20 <- list()
+PD2182sequel_ecoli_plots_outside10 <- list()
+PD2182sequel_ecoli_plots_with_estimate_outside20 <- list()
+PD2182sequel_ecoli_plots_with_estimate_outside10 <- list()
+abcd_ecoli_plots <- list()
+abcd_ecoli_plots_with_estimate <- list()
+abcd_ecoli_plots_outside20 <- list()
+abcd_ecoli_plots_outside10 <- list()
+abcd_ecoli_plots_with_estimate_outside20 <- list()
+abcd_ecoli_plots_with_estimate_outside10 <- list()
+kl_ecoli_plots <- list()
+kl_ecoli_plots_with_estimate <- list()
+kl_ecoli_plots_outside20 <- list()
+kl_ecoli_plots_outside10 <- list()
+kl_ecoli_plots_with_estimate_outside20 <- list()
+kl_ecoli_plots_with_estimate_outside10 <- list()
+# Comparison of C. elegans IPDs and E. coli IPDs
+ab_comparison_plots <- list()
+ab_comparison_plots_outside20 <- list()
+ab_comparison_plots_outside10 <- list()
+cd_comparison_plots <- list()
+cd_comparison_plots_outside20 <- list()
+cd_comparison_plots_outside10 <- list()
+k_comparison_plots <- list()
+k_comparison_plots_outside20 <- list()
+k_comparison_plots_outside10 <- list()
+l_comparison_plots <- list()
+l_comparison_plots_outside20 <- list()
+l_comparison_plots_outside10 <- list()
+PD2182sequel_comparison_plots <- list()
+PD2182sequel_comparison_plots_outside20 <- list()
+PD2182sequel_comparison_plots_outside10 <- list()
+abcd_comparison_plots <- list()
+abcd_comparison_plots_outside20 <- list()
+abcd_comparison_plots_outside10 <- list()
+kl_comparison_plots <- list()
+kl_comparison_plots_outside20 <- list()
+kl_comparison_plots_outside10 <- list()
+# Comparison of C. elegans WGA and native
+ab_k_comparison_plots <- list()
+ab_k_comparison_plots_outside20 <- list()
+ab_k_comparison_plots_outside10 <- list()
+cd_l_comparison_plots <- list()
+cd_l_comparison_plots_outside20 <- list()
+cd_l_comparison_plots_outside10 <- list()
+null_PD2182sequel_comparison_plots <- list()
+null_PD2182sequel_comparison_plots_outside20 <- list()
+null_PD2182sequel_comparison_plots_outside10 <- list()
+abcd_kl_comparison_plots <- list()
+abcd_kl_comparison_plots_outside20 <- list()
+abcd_kl_comparison_plots_outside10 <- list()
+# Comparison of E. coli WGA and native
+ab_k_comparison_ecoli_plots <- list()
+ab_k_comparison_ecoli_plots_outside20 <- list()
+ab_k_comparison_ecoli_plots_outside10 <- list()
+cd_l_comparison_ecoli_plots <- list()
+cd_l_comparison_ecoli_plots_outside20 <- list()
+cd_l_comparison_ecoli_plots_outside10 <- list()
+null_PD2182sequel_comparison_ecoli_plots <- list()
+null_PD2182sequel_comparison_ecoli_plots_outside20 <- list()
+null_PD2182sequel_comparison_ecoli_plots_outside10 <- list()
+abcd_kl_comparison_ecoli_plots <- list()
+abcd_kl_comparison_ecoli_plots_outside20 <- list()
+abcd_kl_comparison_ecoli_plots_outside10 <- list()
+
+legend_plot <- NULL
+legend_plot_with_estimate <- NULL
+legend_plot_comparison <- NULL
+legend_plot_wga_native_comparison <- NULL
+ylab_expr2 <- bquote(log[2]~IPD)
+ylab_expr <- "IPD"
+
+#position,strand,label,mean,var,N,motif_occ,region
+null_ipd <- data.table(position = integer(0), strand = character(0), value = numeric(0), label = character(0), src = integer(0))
+
+for (motif_dir in motif_dirs) {
+    cat(sprintf("Start processing motif %s\n", motif_dir))
+    type1_text <- "observed"
+    type2_text <- "estimated"
+    ab_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.c_elegans.csv"))
+    ab_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.ab.c_elegans.csv"))
+    ab_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, ab_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/WGA\n/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_plots[[motif_dir]] <- ab_plots_tmp[["kinetics1"]]
+    ab_plots_with_estimate[[motif_dir]] <- ab_plots_tmp[["comparison"]]
+    ab_plots_outside20[[motif_dir]] <- ab_plots_tmp[["kinetics1_outside20"]]
+    ab_plots_outside10[[motif_dir]] <- ab_plots_tmp[["kinetics1_outside10"]]
+    ab_plots_with_estimate_outside20[[motif_dir]] <- ab_plots_tmp[["comparison_outside20"]]
+    ab_plots_with_estimate_outside10[[motif_dir]] <- ab_plots_tmp[["comparison_outside10"]]
+
+    if (is.null(legend_plot_with_estimate)) {
+        legend_plot <- get_legend(ab_plots_tmp[["kinetics1"]])
+        legend_plot_with_estimate <- get_legend(ab_plots_tmp[["comparison"]])
+    }
+
+    cd_ipd <- fread(paste0(motif_dir, "/motif_ipd.cd.c_elegans.csv"))
+    cd_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.cd.c_elegans.csv"))
+    cd_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, cd_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/WGA\n/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_plots[[motif_dir]] <- cd_plots_tmp[["kinetics1"]]
+    cd_plots_with_estimate[[motif_dir]] <- cd_plots_tmp[["comparison"]]
+    cd_plots_outside20[[motif_dir]] <- cd_plots_tmp[["kinetics1_outside20"]]
+    cd_plots_outside10[[motif_dir]] <- cd_plots_tmp[["kinetics1_outside10"]]
+    cd_plots_with_estimate_outside20[[motif_dir]] <- cd_plots_tmp[["comparison_outside20"]]
+    cd_plots_with_estimate_outside10[[motif_dir]] <- cd_plots_tmp[["comparison_outside10"]]
+    
+    PD2182sequel_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182sequel.c_elegans.csv"))
+    PD2182sequel_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.PD2182sequel.c_elegans.csv"))
+    PD2182sequel_plots_tmp <- plot_motif_kinetics_comparison(PD2182sequel_ipd, PD2182sequel_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "PD2182/native\n/C. elegans", ylab_expr, N_PD2182sequel_deep_IPD_mean, N_PD2182sequel_deep_IPD_var, N_PD2182sequel_deep_IPD_size)
+    PD2182sequel_plots[[motif_dir]] <- PD2182sequel_plots_tmp[["kinetics1"]]
+    PD2182sequel_plots_with_estimate[[motif_dir]] <- PD2182sequel_plots_tmp[["comparison"]]
+    PD2182sequel_plots_outside20[[motif_dir]] <- PD2182sequel_plots_tmp[["kinetics1_outside20"]]
+    PD2182sequel_plots_outside10[[motif_dir]] <- PD2182sequel_plots_tmp[["kinetics1_outside10"]]
+    PD2182sequel_plots_with_estimate_outside20[[motif_dir]] <- PD2182sequel_plots_tmp[["comparison_outside20"]]
+    PD2182sequel_plots_with_estimate_outside10[[motif_dir]] <- PD2182sequel_plots_tmp[["comparison_outside10"]]
+    
+    k_ipd <- fread(paste0(motif_dir, "/motif_ipd.k.c_elegans.csv"))
+    k_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.k.c_elegans.csv"))
+    k_plots_tmp <- plot_motif_kinetics_comparison(k_ipd, k_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/native\n/C. elegans", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
+    k_plots[[motif_dir]] <- k_plots_tmp[["kinetics1"]]
+    k_plots_with_estimate[[motif_dir]] <- k_plots_tmp[["comparison"]]
+    k_plots_outside20[[motif_dir]] <- k_plots_tmp[["kinetics1_outside20"]]
+    k_plots_outside10[[motif_dir]] <- k_plots_tmp[["kinetics1_outside10"]]
+    k_plots_with_estimate_outside20[[motif_dir]] <- k_plots_tmp[["comparison_outside20"]]
+    k_plots_with_estimate_outside10[[motif_dir]] <- k_plots_tmp[["comparison_outside10"]]
+    
+    l_ipd <- fread(paste0(motif_dir, "/motif_ipd.l.c_elegans.csv"))
+    l_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.l.c_elegans.csv"))
+    l_plots_tmp <- plot_motif_kinetics_comparison(l_ipd, l_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/native\n/C. elegans", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
+    l_plots[[motif_dir]] <- l_plots_tmp[["kinetics1"]]
+    l_plots_with_estimate[[motif_dir]] <- l_plots_tmp[["comparison"]]
+    l_plots_outside20[[motif_dir]] <- l_plots_tmp[["kinetics1_outside20"]]
+    l_plots_outside10[[motif_dir]] <- l_plots_tmp[["kinetics1_outside10"]]
+    l_plots_with_estimate_outside20[[motif_dir]] <- l_plots_tmp[["comparison_outside20"]]
+    l_plots_with_estimate_outside10[[motif_dir]] <- l_plots_tmp[["comparison_outside10"]]
+    
+    abcd_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.c_elegans.csv"))
+    abcd_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.abcd.c_elegans.csv"))
+    abcd_plots_tmp <- plot_motif_kinetics_comparison(abcd_ipd, abcd_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA\n/C. elegans", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_plots[[motif_dir]] <- abcd_plots_tmp[["kinetics1"]]
+    abcd_plots_with_estimate[[motif_dir]] <- abcd_plots_tmp[["comparison"]]
+    abcd_plots_outside20[[motif_dir]] <- abcd_plots_tmp[["kinetics1_outside20"]]
+    abcd_plots_outside10[[motif_dir]] <- abcd_plots_tmp[["kinetics1_outside10"]]
+    abcd_plots_with_estimate_outside20[[motif_dir]] <- abcd_plots_tmp[["comparison_outside20"]]
+    abcd_plots_with_estimate_outside10[[motif_dir]] <- abcd_plots_tmp[["comparison_outside10"]]
+
+    kl_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.c_elegans.csv"))
+    kl_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.kl.c_elegans.csv"))
+    kl_plots_tmp <- plot_motif_kinetics_comparison(kl_ipd, kl_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native\n/C. elegans", ylab_expr, N_kl_deep_IPD_mean, N_kl_deep_IPD_var, N_kl_deep_IPD_size)
+    kl_plots[[motif_dir]] <- kl_plots_tmp[["kinetics1"]]
+    kl_plots_with_estimate[[motif_dir]] <- kl_plots_tmp[["comparison"]]
+    kl_plots_outside20[[motif_dir]] <- kl_plots_tmp[["kinetics1_outside20"]]
+    kl_plots_outside10[[motif_dir]] <- kl_plots_tmp[["kinetics1_outside10"]]
+    kl_plots_with_estimate_outside20[[motif_dir]] <- kl_plots_tmp[["comparison_outside20"]]
+    kl_plots_with_estimate_outside10[[motif_dir]] <- kl_plots_tmp[["comparison_outside10"]]
+
+    ab_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.ab.e_coli.csv"))
+    ab_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.ab.e_coli.csv"))
+    ab_ecoli_plots_tmp <- plot_motif_kinetics_comparison(ab_ecoli_ipd, ab_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/WGA\n/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
+    ab_ecoli_plots[[motif_dir]] <- ab_ecoli_plots_tmp[["kinetics1"]]
+    ab_ecoli_plots_with_estimate[[motif_dir]] <- ab_ecoli_plots_tmp[["comparison"]]
+    ab_ecoli_plots_outside20[[motif_dir]] <- ab_ecoli_plots_tmp[["kinetics1_outside20"]]
+    ab_ecoli_plots_outside10[[motif_dir]] <- ab_ecoli_plots_tmp[["kinetics1_outside10"]]
+    ab_ecoli_plots_with_estimate_outside20[[motif_dir]] <- ab_ecoli_plots_tmp[["comparison_outside20"]]
+    ab_ecoli_plots_with_estimate_outside10[[motif_dir]] <- ab_ecoli_plots_tmp[["comparison_outside10"]]
+
+    cd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.cd.e_coli.csv"))
+    cd_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.cd.e_coli.csv"))
+    cd_ecoli_plots_tmp <- plot_motif_kinetics_comparison(cd_ecoli_ipd, cd_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/WGA\n/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
+    cd_ecoli_plots[[motif_dir]] <- cd_ecoli_plots_tmp[["kinetics1"]]
+    cd_ecoli_plots_with_estimate[[motif_dir]] <- cd_ecoli_plots_tmp[["comparison"]]
+    cd_ecoli_plots_outside20[[motif_dir]] <- cd_ecoli_plots_tmp[["kinetics1_outside20"]]
+    cd_ecoli_plots_outside10[[motif_dir]] <- cd_ecoli_plots_tmp[["kinetics1_outside10"]]
+    cd_ecoli_plots_with_estimate_outside20[[motif_dir]] <- cd_ecoli_plots_tmp[["comparison_outside20"]]
+    cd_ecoli_plots_with_estimate_outside10[[motif_dir]] <- cd_ecoli_plots_tmp[["comparison_outside10"]]
+
+    k_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.k.e_coli.csv"))
+    k_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.k.e_coli.csv"))
+    k_ecoli_plots_tmp <- plot_motif_kinetics_comparison(k_ecoli_ipd, k_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/native\n/E. coli", ylab_expr, N_k_ecoli_deep_IPD_mean, N_k_ecoli_deep_IPD_var, N_k_ecoli_deep_IPD_size)
+    k_ecoli_plots[[motif_dir]] <- k_ecoli_plots_tmp[["kinetics1"]]
+    k_ecoli_plots_with_estimate[[motif_dir]] <- k_ecoli_plots_tmp[["comparison"]]
+    k_ecoli_plots_outside20[[motif_dir]] <- k_ecoli_plots_tmp[["kinetics1_outside20"]]
+    k_ecoli_plots_outside10[[motif_dir]] <- k_ecoli_plots_tmp[["kinetics1_outside10"]]
+    k_ecoli_plots_with_estimate_outside20[[motif_dir]] <- k_ecoli_plots_tmp[["comparison_outside20"]]
+    k_ecoli_plots_with_estimate_outside10[[motif_dir]] <- k_ecoli_plots_tmp[["comparison_outside10"]]
+
+    l_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.l.e_coli.csv"))
+    l_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.l.e_coli.csv"))
+    l_ecoli_plots_tmp <- plot_motif_kinetics_comparison(l_ecoli_ipd, l_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/native\n/E. coli", ylab_expr, N_l_ecoli_deep_IPD_mean, N_l_ecoli_deep_IPD_var, N_l_ecoli_deep_IPD_size)
+    l_ecoli_plots[[motif_dir]] <- l_ecoli_plots_tmp[["kinetics1"]]
+    l_ecoli_plots_with_estimate[[motif_dir]] <- l_ecoli_plots_tmp[["comparison"]]
+    l_ecoli_plots_outside20[[motif_dir]] <- l_ecoli_plots_tmp[["kinetics1_outside20"]]
+    l_ecoli_plots_outside10[[motif_dir]] <- l_ecoli_plots_tmp[["kinetics1_outside10"]]
+    l_ecoli_plots_with_estimate_outside20[[motif_dir]] <- l_ecoli_plots_tmp[["comparison_outside20"]]
+    l_ecoli_plots_with_estimate_outside10[[motif_dir]] <- l_ecoli_plots_tmp[["comparison_outside10"]]
+
+    PD2182sequel_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.PD2182sequel.e_coli.csv"))
+    PD2182sequel_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.PD2182sequel.e_coli.csv"))
+    PD2182sequel_ecoli_plots_tmp <- plot_motif_kinetics_comparison(PD2182sequel_ecoli_ipd, PD2182sequel_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "PD2182/native\n/E. coli", ylab_expr, N_PD2182sequel_ecoli_deep_IPD_mean, N_PD2182sequel_ecoli_deep_IPD_var, N_PD2182sequel_ecoli_deep_IPD_size)
+    PD2182sequel_ecoli_plots[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["kinetics1"]]
+    PD2182sequel_ecoli_plots_with_estimate[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["comparison"]]
+    PD2182sequel_ecoli_plots_outside20[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["kinetics1_outside20"]]
+    PD2182sequel_ecoli_plots_outside10[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["kinetics1_outside10"]]
+    PD2182sequel_ecoli_plots_with_estimate_outside20[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["comparison_outside20"]]
+    PD2182sequel_ecoli_plots_with_estimate_outside10[[motif_dir]] <- PD2182sequel_ecoli_plots_tmp[["comparison_outside10"]]
+
+    abcd_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.abcd.e_coli.csv"))
+    abcd_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.abcd.e_coli.csv"))
+    abcd_ecoli_plots_tmp <- plot_motif_kinetics_comparison(abcd_ecoli_ipd, abcd_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA\n/E. coli", ylab_expr, N_abcd_ecoli_deep_IPD_mean, N_abcd_ecoli_deep_IPD_var, N_abcd_ecoli_deep_IPD_size)
+    abcd_ecoli_plots[[motif_dir]] <- abcd_ecoli_plots_tmp[["kinetics1"]]
+    abcd_ecoli_plots_with_estimate[[motif_dir]] <- abcd_ecoli_plots_tmp[["comparison"]]
+    abcd_ecoli_plots_outside20[[motif_dir]] <- abcd_ecoli_plots_tmp[["kinetics1_outside20"]]
+    abcd_ecoli_plots_outside10[[motif_dir]] <- abcd_ecoli_plots_tmp[["kinetics1_outside10"]]
+    abcd_ecoli_plots_with_estimate_outside20[[motif_dir]] <- abcd_ecoli_plots_tmp[["comparison_outside20"]]
+    abcd_ecoli_plots_with_estimate_outside10[[motif_dir]] <- abcd_ecoli_plots_tmp[["comparison_outside10"]]
+
+    kl_ecoli_ipd <- fread(paste0(motif_dir, "/motif_ipd.kl.e_coli.csv"))
+    kl_ecoli_modelPrediction <- fread(paste0(motif_dir, "/motif_modelPrediction.kl.e_coli.csv"))
+    kl_ecoli_plots_tmp <- plot_motif_kinetics_comparison(kl_ecoli_ipd, kl_ecoli_modelPrediction, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native\n/E. coli", ylab_expr, N_kl_ecoli_deep_IPD_mean, N_kl_ecoli_deep_IPD_var, N_kl_ecoli_deep_IPD_size)
+    kl_ecoli_plots[[motif_dir]] <- kl_ecoli_plots_tmp[["kinetics1"]]
+    kl_ecoli_plots_with_estimate[[motif_dir]] <- kl_ecoli_plots_tmp[["comparison"]]
+    kl_ecoli_plots_outside20[[motif_dir]] <- kl_ecoli_plots_tmp[["kinetics1_outside20"]]
+    kl_ecoli_plots_outside10[[motif_dir]] <- kl_ecoli_plots_tmp[["kinetics1_outside10"]]
+    kl_ecoli_plots_with_estimate_outside20[[motif_dir]] <- kl_ecoli_plots_tmp[["comparison_outside20"]]
+    kl_ecoli_plots_with_estimate_outside10[[motif_dir]] <- kl_ecoli_plots_tmp[["comparison_outside10"]]
+
+    type1_text <- "C. elegans"
+    type2_text <- "E. coli"
+    ab_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, ab_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/WGA", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_comparison_plots[[motif_dir]] <- ab_comparison_plots_tmp[["comparison"]]
+    ab_comparison_plots_outside20[[motif_dir]] <- ab_comparison_plots_tmp[["comparison_outside20"]]
+    ab_comparison_plots_outside10[[motif_dir]] <- ab_comparison_plots_tmp[["comparison_outside10"]]
+    cd_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, cd_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/WGA", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_comparison_plots[[motif_dir]] <- cd_comparison_plots_tmp[["comparison"]]
+    cd_comparison_plots_outside20[[motif_dir]] <- cd_comparison_plots_tmp[["comparison_outside20"]]
+    cd_comparison_plots_outside10[[motif_dir]] <- cd_comparison_plots_tmp[["comparison_outside10"]]
+    k_comparison_plots_tmp <- plot_motif_kinetics_comparison(k_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/native", ylab_expr, N_k_deep_IPD_mean, N_k_deep_IPD_var, N_k_deep_IPD_size)
+    k_comparison_plots[[motif_dir]] <- k_comparison_plots_tmp[["comparison"]]
+    k_comparison_plots_outside20[[motif_dir]] <- k_comparison_plots_tmp[["comparison_outside20"]]
+    k_comparison_plots_outside10[[motif_dir]] <- k_comparison_plots_tmp[["comparison_outside10"]]
+    l_comparison_plots_tmp <- plot_motif_kinetics_comparison(l_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/native", ylab_expr, N_l_deep_IPD_mean, N_l_deep_IPD_var, N_l_deep_IPD_size)
+    l_comparison_plots[[motif_dir]] <- l_comparison_plots_tmp[["comparison"]]
+    l_comparison_plots_outside20[[motif_dir]] <- l_comparison_plots_tmp[["comparison_outside20"]]
+    l_comparison_plots_outside10[[motif_dir]] <- l_comparison_plots_tmp[["comparison_outside10"]]
+    PD2182sequel_comparison_plots_tmp <- plot_motif_kinetics_comparison(PD2182sequel_ipd, PD2182sequel_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "PD2182/native", ylab_expr, N_PD2182sequel_deep_IPD_mean, N_PD2182sequel_deep_IPD_var, N_PD2182sequel_deep_IPD_size)
+    PD2182sequel_comparison_plots[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison"]]
+    PD2182sequel_comparison_plots_outside20[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison_outside20"]]
+    PD2182sequel_comparison_plots_outside10[[motif_dir]] <- PD2182sequel_comparison_plots_tmp[["comparison_outside10"]]
+    abcd_comparison_plots_tmp <- plot_motif_kinetics_comparison(abcd_ipd, abcd_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/WGA", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_comparison_plots[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison"]]
+    abcd_comparison_plots_outside20[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison_outside20"]]
+    abcd_comparison_plots_outside10[[motif_dir]] <- abcd_comparison_plots_tmp[["comparison_outside10"]]
+    kl_comparison_plots_tmp <- plot_motif_kinetics_comparison(kl_ipd, kl_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/native", ylab_expr, N_kl_deep_IPD_mean, N_kl_deep_IPD_var, N_kl_deep_IPD_size)
+    kl_comparison_plots[[motif_dir]] <- kl_comparison_plots_tmp[["comparison"]]
+    kl_comparison_plots_outside20[[motif_dir]] <- kl_comparison_plots_tmp[["comparison_outside20"]]
+    kl_comparison_plots_outside10[[motif_dir]] <- kl_comparison_plots_tmp[["comparison_outside10"]]
+    if (is.null(legend_plot_comparison)) {
+        legend_plot_comparison <- get_legend(ab_comparison_plots_tmp[["comparison"]])
+    }
+
+    type1_text <- "WGA"
+    type2_text <- "native"
+    # WGA vs native in C. elegans
+    ab_k_comparison_plots_tmp <- plot_motif_kinetics_comparison(ab_ipd, k_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/C. elegans", ylab_expr, N_ab_deep_IPD_mean, N_ab_deep_IPD_var, N_ab_deep_IPD_size)
+    ab_k_comparison_plots[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison"]]
+    ab_k_comparison_plots_outside20[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside20"]]
+    ab_k_comparison_plots_outside10[[motif_dir]] <- ab_k_comparison_plots_tmp[["comparison_outside10"]]
+    cd_l_comparison_plots_tmp <- plot_motif_kinetics_comparison(cd_ipd, l_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/C. elegans", ylab_expr, N_cd_deep_IPD_mean, N_cd_deep_IPD_var, N_cd_deep_IPD_size)
+    cd_l_comparison_plots[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison"]]
+    cd_l_comparison_plots_outside20[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside20"]]
+    cd_l_comparison_plots_outside10[[motif_dir]] <- cd_l_comparison_plots_tmp[["comparison_outside10"]]
+    null_PD2182sequel_comparison_plots_tmp <- plot_motif_kinetics_comparison(null_ipd, PD2182sequel_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "PD2182/C. elegans", ylab_expr, N_PD2182sequel_deep_IPD_mean, N_PD2182sequel_deep_IPD_var, N_PD2182sequel_deep_IPD_size)
+    null_PD2182sequel_comparison_plots[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison"]]
+    null_PD2182sequel_comparison_plots_outside20[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison_outside20"]]
+    null_PD2182sequel_comparison_plots_outside10[[motif_dir]] <- null_PD2182sequel_comparison_plots_tmp[["comparison_outside10"]]
+    abcd_kl_comparison_plots_tmp <- plot_motif_kinetics_comparison(abcd_ipd, kl_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/C. elegans", ylab_expr, N_abcd_deep_IPD_mean, N_abcd_deep_IPD_var, N_abcd_deep_IPD_size)
+    abcd_kl_comparison_plots[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison"]]
+    abcd_kl_comparison_plots_outside20[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside20"]]
+    abcd_kl_comparison_plots_outside10[[motif_dir]] <- abcd_kl_comparison_plots_tmp[["comparison_outside10"]]
+    # WGA vs native in E. coli
+    ab_k_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(ab_ecoli_ipd, k_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 1/E. coli", ylab_expr, N_ab_ecoli_deep_IPD_mean, N_ab_ecoli_deep_IPD_var, N_ab_ecoli_deep_IPD_size)
+    ab_k_comparison_ecoli_plots[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison"]]
+    ab_k_comparison_ecoli_plots_outside20[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison_outside20"]]
+    ab_k_comparison_ecoli_plots_outside10[[motif_dir]] <- ab_k_comparison_ecoli_plots_tmp[["comparison_outside10"]]
+    cd_l_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(cd_ecoli_ipd, l_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Replicate 2/E. coli", ylab_expr, N_cd_ecoli_deep_IPD_mean, N_cd_ecoli_deep_IPD_var, N_cd_ecoli_deep_IPD_size)
+    cd_l_comparison_ecoli_plots[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison"]]
+    cd_l_comparison_ecoli_plots_outside20[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison_outside20"]]
+    cd_l_comparison_ecoli_plots_outside10[[motif_dir]] <- cd_l_comparison_ecoli_plots_tmp[["comparison_outside10"]]
+    null_PD2182sequel_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(null_ipd, PD2182sequel_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "PD2182/E. coli", ylab_expr, N_PD2182sequel_ecoli_deep_IPD_mean, N_PD2182sequel_ecoli_deep_IPD_var, N_PD2182sequel_ecoli_deep_IPD_size)
+    null_PD2182sequel_comparison_ecoli_plots[[motif_dir]] <- null_PD2182sequel_comparison_ecoli_plots_tmp[["comparison"]]
+    null_PD2182sequel_comparison_ecoli_plots_outside20[[motif_dir]] <- null_PD2182sequel_comparison_ecoli_plots_tmp[["comparison_outside20"]]
+    null_PD2182sequel_comparison_ecoli_plots_outside10[[motif_dir]] <- null_PD2182sequel_comparison_ecoli_plots_tmp[["comparison_outside10"]]
+    abcd_kl_comparison_ecoli_plots_tmp <- plot_motif_kinetics_comparison(abcd_ecoli_ipd, kl_ecoli_ipd, type1_text, type2_text, lookup_motif_title(motif_dir), lookup_motif_string(motif_dir), "Merged/E. coli", ylab_expr, N_abcd_ecoli_deep_IPD_mean, N_abcd_ecoli_deep_IPD_var, N_abcd_ecoli_deep_IPD_size)
+    abcd_kl_comparison_ecoli_plots[[motif_dir]] <- abcd_kl_comparison_ecoli_plots_tmp[["comparison"]]
+    abcd_kl_comparison_ecoli_plots_outside20[[motif_dir]] <- abcd_kl_comparison_ecoli_plots_tmp[["comparison_outside20"]]
+    abcd_kl_comparison_ecoli_plots_outside10[[motif_dir]] <- abcd_kl_comparison_ecoli_plots_tmp[["comparison_outside10"]]
+    if (is.null(legend_plot_wga_native_comparison)) {
+        legend_plot_wga_native_comparison <- get_legend(ab_k_comparison_plots_tmp[["comparison"]])
+    }
+}
+
+ab_plots[["legend"]] <- legend_plot
+cd_plots[["legend"]] <- legend_plot
+PD2182sequel_plots[["legend"]] <- legend_plot
+k_plots[["legend"]] <- legend_plot
+l_plots[["legend"]] <- legend_plot
+abcd_plots[["legend"]] <- legend_plot
+kl_plots[["legend"]] <- legend_plot
+ab_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+cd_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+k_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+l_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+ab_plots_outside20[["legend"]] <- legend_plot
+cd_plots_outside20[["legend"]] <- legend_plot
+PD2182sequel_plots_outside20[["legend"]] <- legend_plot
+k_plots_outside20[["legend"]] <- legend_plot
+l_plots_outside20[["legend"]] <- legend_plot
+abcd_plots_outside20[["legend"]] <- legend_plot
+kl_plots_outside20[["legend"]] <- legend_plot
+ab_plots_outside10[["legend"]] <- legend_plot
+cd_plots_outside10[["legend"]] <- legend_plot
+PD2182sequel_plots_outside10[["legend"]] <- legend_plot
+k_plots_outside10[["legend"]] <- legend_plot
+l_plots_outside10[["legend"]] <- legend_plot
+abcd_plots_outside10[["legend"]] <- legend_plot
+kl_plots_outside10[["legend"]] <- legend_plot
+ab_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+cd_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+k_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+l_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+ab_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+cd_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+k_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+l_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+abcd_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+kl_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+ab_ecoli_plots[["legend"]] <- legend_plot
+ab_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+ab_ecoli_plots_outside20[["legend"]] <- legend_plot
+ab_ecoli_plots_outside10[["legend"]] <- legend_plot
+ab_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+ab_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+cd_ecoli_plots[["legend"]] <- legend_plot
+cd_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+cd_ecoli_plots_outside20[["legend"]] <- legend_plot
+cd_ecoli_plots_outside10[["legend"]] <- legend_plot
+cd_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+cd_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+k_ecoli_plots[["legend"]] <- legend_plot
+k_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+k_ecoli_plots_outside20[["legend"]] <- legend_plot
+k_ecoli_plots_outside10[["legend"]] <- legend_plot
+k_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+k_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+l_ecoli_plots[["legend"]] <- legend_plot
+l_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+l_ecoli_plots_outside20[["legend"]] <- legend_plot
+l_ecoli_plots_outside10[["legend"]] <- legend_plot
+l_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+l_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_ecoli_plots[["legend"]] <- legend_plot
+PD2182sequel_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_ecoli_plots_outside20[["legend"]] <- legend_plot
+PD2182sequel_ecoli_plots_outside10[["legend"]] <- legend_plot
+PD2182sequel_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+PD2182sequel_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots[["legend"]] <- legend_plot
+abcd_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots_outside20[["legend"]] <- legend_plot
+abcd_ecoli_plots_outside10[["legend"]] <- legend_plot
+abcd_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+abcd_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots[["legend"]] <- legend_plot
+kl_ecoli_plots_with_estimate[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots_outside20[["legend"]] <- legend_plot
+kl_ecoli_plots_outside10[["legend"]] <- legend_plot
+kl_ecoli_plots_with_estimate_outside20[["legend"]] <- legend_plot_with_estimate
+kl_ecoli_plots_with_estimate_outside10[["legend"]] <- legend_plot_with_estimate
+ab_comparison_plots[["legend"]] <- legend_plot_comparison
+ab_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+ab_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+cd_comparison_plots[["legend"]] <- legend_plot_comparison
+cd_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+cd_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+k_comparison_plots[["legend"]] <- legend_plot_comparison
+k_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+k_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+l_comparison_plots[["legend"]] <- legend_plot_comparison
+l_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+l_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+PD2182sequel_comparison_plots[["legend"]] <- legend_plot_comparison
+PD2182sequel_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+PD2182sequel_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+abcd_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+kl_comparison_plots[["legend"]] <- legend_plot_comparison
+kl_comparison_plots_outside20[["legend"]] <- legend_plot_comparison
+kl_comparison_plots_outside10[["legend"]] <- legend_plot_comparison
+ab_k_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
+ab_k_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+ab_k_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+ab_k_comparison_ecoli_plots[["legend"]] <- legend_plot_wga_native_comparison
+ab_k_comparison_ecoli_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+ab_k_comparison_ecoli_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_ecoli_plots[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_ecoli_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+cd_l_comparison_ecoli_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_ecoli_plots[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_ecoli_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+null_PD2182sequel_comparison_ecoli_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_ecoli_plots[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_ecoli_plots_outside20[["legend"]] <- legend_plot_wga_native_comparison
+abcd_kl_comparison_ecoli_plots_outside10[["legend"]] <- legend_plot_wga_native_comparison
+
+# All sample arrangement (C. elegans)
+pdf_width <- 3
+n_motifs_high_ipd <- length(motifs_high_ipd)
+n_sample <- 7
+ncol2 <- 1
+rel_widths2 <- c(0.25, rep(1, ncol2))
+n_page_high_ipd <- ((n_motifs_high_ipd - 1) %/% ncol2) + 1
+height_per_motif <- 1.5
+pdf_height_high2 <- n_sample * height_per_motif
+label_size <- 10
+pdf_font <- "Arimo"
+
+p_text_ab <- ggdraw() + draw_label("Replicate 1/WGA", angle = 90, size = label_size)
+p_text_cd <- ggdraw() + draw_label("Replicate 2/WGA", angle = 90, size = label_size)
+p_text_PD2182sequel <- ggdraw() + draw_label("PD2182\n(PacBio Sequel)", angle = 90, size = label_size)
+p_text_k <- ggdraw() + draw_label("Replicate 1/native", angle = 90, size = label_size)
+p_text_l <- ggdraw() + draw_label("Replicate 2/native", angle = 90, size = label_size)
+p_text_abcd <- ggdraw() + draw_label("Merged/WGA", angle = 90, size = label_size)
+p_text_kl <- ggdraw() + draw_label("Merged/native", angle = 90, size = label_size)
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    # ab_plots["null"] returns NULL, because there is no such element
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
+               list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
+               list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
+               list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+pdf_width <- 3
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_with_estimate.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
+               list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_with_estimate_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
+               list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_with_estimate_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
+               list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+# All sample arrangement (comparison of C. elegans and E. coli)
+pdf_width <- 3
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_ecoli_comparison.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_comparison_plots[p_motifs], list(p_text_cd), cd_comparison_plots[p_motifs],
+               list(p_text_k), k_comparison_plots[p_motifs], list(p_text_l), l_comparison_plots[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots[p_motifs], list(p_text_kl), kl_comparison_plots[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_ecoli_comparison_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_comparison_plots_outside20[p_motifs], list(p_text_cd), cd_comparison_plots_outside20[p_motifs],
+               list(p_text_k), k_comparison_plots_outside20[p_motifs], list(p_text_l), l_comparison_plots_outside20[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside20[p_motifs], list(p_text_kl), kl_comparison_plots_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_ecoli_comparison_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_comparison_plots_outside10[p_motifs], list(p_text_cd), cd_comparison_plots_outside10[p_motifs],
+               list(p_text_k), k_comparison_plots_outside10[p_motifs], list(p_text_l), l_comparison_plots_outside10[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_comparison_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_comparison_plots_outside10[p_motifs], list(p_text_kl), kl_comparison_plots_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+# All sample arrangement (C. elegans and E. coli)
+pdf_width <- 3
+n_motifs_high_ipd <- length(motifs_high_ipd)
+n_sample <- 13
+ncol2 <- 1
+rel_widths2 <- c(0.25, rep(1, ncol2))
+n_page_high_ipd <- ((n_motifs_high_ipd - 1) %/% ncol2) + 1
+height_per_motif <- 1.5
+pdf_height_high2 <- n_sample * height_per_motif
+
+p_text_ab <- ggdraw() + draw_label("Replicate 1/WGA\nC. elegans", angle = 90, size = label_size)
+p_text_cd <- ggdraw() + draw_label("Replicate 2/WGA\nC. elegans", angle = 90, size = label_size)
+p_text_PD2182 <- ggdraw() + draw_label("PD2182\n(PacBio RS II)\nC. elegans", angle = 90, size = label_size)
+p_text_PD2182sequel <- ggdraw() + draw_label("PD2182\n(PacBio Sequel)\nC. elegans", angle = 90, size = label_size)
+p_text_k <- ggdraw() + draw_label("Replicate 1/native\nC. elegans", angle = 90, size = label_size)
+p_text_l <- ggdraw() + draw_label("Replicate 2/native\nC. elegans", angle = 90, size = label_size)
+p_text_abcd <- ggdraw() + draw_label("Merged/WGA\nC. elegans", angle = 90, size = label_size)
+p_text_kl <- ggdraw() + draw_label("Merged/native\nC. elegans", angle = 90, size = label_size)
+p_text_ab_ecoli <- ggdraw() + draw_label("Replicate 1/WGA\nE. coli", angle = 90, size = label_size)
+p_text_cd_ecoli <- ggdraw() + draw_label("Replicate 2/WGA\nE. coli", angle = 90, size = label_size)
+p_text_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182\n(PacBio Sequel)\nE. coli", angle = 90, size = label_size)
+p_text_k_ecoli <- ggdraw() + draw_label("Replicate 1/native\nE. coli", angle = 90, size = label_size)
+p_text_l_ecoli <- ggdraw() + draw_label("Replicate 2/native\nE. coli", angle = 90, size = label_size)
+p_text_abcd_ecoli <- ggdraw() + draw_label("Merged/WGA\nE. coli", angle = 90, size = label_size)
+p_text_kl_ecoli <- ggdraw() + draw_label("Merged/native\nE. coli", angle = 90, size = label_size)
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    # ab_plots["null"] returns NULL, because there is no such element
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots[p_motifs], list(p_text_cd), cd_plots[p_motifs],
+               list(p_text_k), k_plots[p_motifs], list(p_text_l), l_plots[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots[p_motifs],
+               list(p_text_abcd), abcd_plots[p_motifs], list(p_text_kl), kl_plots[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots[p_motifs], list(p_text_l_ecoli), l_ecoli_plots[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_outside20[p_motifs], list(p_text_cd), cd_plots_outside20[p_motifs],
+               list(p_text_k), k_plots_outside20[p_motifs], list(p_text_l), l_plots_outside20[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_outside20[p_motifs], list(p_text_kl), kl_plots_outside20[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside20[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_outside10[p_motifs], list(p_text_cd), cd_plots_outside10[p_motifs],
+               list(p_text_k), k_plots_outside10[p_motifs], list(p_text_l), l_plots_outside10[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_outside10[p_motifs], list(p_text_kl), kl_plots_outside10[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_outside10[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+pdf_width <- 3
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high_with_estimate.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate[p_motifs], list(p_text_cd), cd_plots_with_estimate[p_motifs],
+               list(p_text_k), k_plots_with_estimate[p_motifs], list(p_text_l), l_plots_with_estimate[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate[p_motifs], list(p_text_kl), kl_plots_with_estimate[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high_with_estimate_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate_outside20[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside20[p_motifs],
+               list(p_text_k), k_plots_with_estimate_outside20[p_motifs], list(p_text_l), l_plots_with_estimate_outside20[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside20[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside20[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside20[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside20[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all_with_ecoli.high_with_estimate_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab), ab_plots_with_estimate_outside10[p_motifs], list(p_text_cd), cd_plots_with_estimate_outside10[p_motifs],
+               list(p_text_k), k_plots_with_estimate_outside10[p_motifs], list(p_text_l), l_plots_with_estimate_outside10[p_motifs],
+               list(p_text_PD2182sequel), PD2182sequel_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd), abcd_plots_with_estimate_outside10[p_motifs], list(p_text_kl), kl_plots_with_estimate_outside10[p_motifs],
+               list(p_text_ab_ecoli), ab_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_cd_ecoli), cd_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_k_ecoli), k_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_l_ecoli), l_ecoli_plots_with_estimate_outside10[p_motifs],
+               list(p_text_abcd_ecoli), abcd_ecoli_plots_with_estimate_outside10[p_motifs], list(p_text_kl_ecoli), kl_ecoli_plots_with_estimate_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+# All sample arrangement (comparison of WGA and native)
+p_text_ab_k <- ggdraw() + draw_label("Replicate 1\nC. elegans", angle = 90, size = label_size)
+p_text_cd_l <- ggdraw() + draw_label("Replicate 2\nC. elegans", angle = 90, size = label_size)
+p_text_null_PD2182sequel <- ggdraw() + draw_label("PD2182\nC. elegans", angle = 90, size = label_size)
+p_text_abcd_kl <- ggdraw() + draw_label("Merged\nC. elegans", angle = 90, size = label_size)
+p_text_ab_k_ecoli <- ggdraw() + draw_label("Replicate 1\nE. coli", angle = 90, size = label_size)
+p_text_cd_l_ecoli <- ggdraw() + draw_label("Replicate 2\nE. coli", angle = 90, size = label_size)
+p_text_null_PD2182sequel_ecoli <- ggdraw() + draw_label("PD2182\nE. coli", angle = 90, size = label_size)
+p_text_abcd_kl_ecoli <- ggdraw() + draw_label("Merged\nE. coli", angle = 90, size = label_size)
+n_motifs_high_ipd <- length(motifs_high_ipd)
+n_sample <- 8
+height_per_motif <- 1.5
+pdf_height_high2 <- n_sample * height_per_motif
+pdf_width <- 3
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_wga_native_comparison.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab_k), ab_k_comparison_plots[p_motifs], list(p_text_cd_l), cd_l_comparison_plots[p_motifs],
+        list(p_text_ab_k_ecoli), ab_k_comparison_ecoli_plots[p_motifs], list(p_text_cd_l_ecoli), cd_l_comparison_ecoli_plots[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots[p_motifs], list(p_text_abcd_kl_ecoli), abcd_kl_comparison_ecoli_plots[p_motifs],
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots[p_motifs], list(p_text_null_PD2182sequel_ecoli), null_PD2182sequel_comparison_ecoli_plots[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_wga_native_comparison_outside20.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside20[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside20[p_motifs],
+        list(p_text_ab_k_ecoli), ab_k_comparison_ecoli_plots_outside20[p_motifs], list(p_text_cd_l_ecoli), cd_l_comparison_ecoli_plots_outside20[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside20[p_motifs], list(p_text_abcd_kl_ecoli), abcd_kl_comparison_ecoli_plots_outside20[p_motifs],
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside20[p_motifs], list(p_text_null_PD2182sequel_ecoli), null_PD2182sequel_comparison_ecoli_plots_outside20[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())
+
+cairo_pdf("arrange_plot_motif_kinetics.stderr.wide_y.motif_region.one_row.v8_linear_positive_strand.low_occ_filter.histogram.all.high_wga_native_comparison_outside10.pdf", width = pdf_width, height = pdf_height_high2, family = pdf_font, onefile = TRUE)
+for(i in 1:n_page_high_ipd){
+    p_range <- (1 + (i - 1) * ncol2):(min(n_motifs_high_ipd, i * ncol2))
+    p_motifs <- c(motifs_high_ipd[p_range], rep("null", ncol2 - length(p_range)))
+    plots <- c(list(p_text_ab_k), ab_k_comparison_plots_outside10[p_motifs], list(p_text_cd_l), cd_l_comparison_plots_outside10[p_motifs],
+        list(p_text_ab_k_ecoli), ab_k_comparison_ecoli_plots_outside10[p_motifs], list(p_text_cd_l_ecoli), cd_l_comparison_ecoli_plots_outside10[p_motifs],
+        list(p_text_abcd_kl), abcd_kl_comparison_plots_outside10[p_motifs], list(p_text_abcd_kl_ecoli), abcd_kl_comparison_ecoli_plots_outside10[p_motifs],
+        list(p_text_null_PD2182sequel), null_PD2182sequel_comparison_plots_outside10[p_motifs], list(p_text_null_PD2182sequel_ecoli), null_PD2182sequel_comparison_ecoli_plots_outside10[p_motifs])
+    print(plot_grid(plotlist = plots, align = "none", ncol = ncol2 + 1, rel_widths = rel_widths2))
+}
+invisible(dev.off())

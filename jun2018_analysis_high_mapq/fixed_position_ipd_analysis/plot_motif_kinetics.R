@@ -1,0 +1,73 @@
+library(data.table)
+library(ggplot2)
+
+welch.t.pvalue <- function(a_mean, a_variance, a_size, b_mean, b_variance, b_size) {
+    a_sq <- (a_variance ^ 2) / a_size
+    b_sq <- (b_variance ^ 2) / b_size
+    t_stat <- (a_mean - b_mean) / sqrt(a_sq + b_sq)
+    dof <- ((a_sq + b_sq) ^ 2) / ((a_sq ^ 2) / (a_size - 1) + (b_sq ^ 2) / (b_size - 1))
+    # Two-sided p-value
+    pt(-abs(t_stat), dof) * 2
+}
+
+plot_motif_kinetics <- function(kinetics, title_text, ylab_text, global_mean, global_var, global_size){
+    if (kinetics[, .N] == 0) {
+        g1 <- ggplot(NULL) + ggtitle(title_text) + geom_text(aes(x = 0, y = 0, label = "No Data"), size = 24)
+        print(g1)
+        return()
+    }
+    kinetics_summary <- kinetics[value > 0 & is.finite(value)][, .(position, strand, label, log2value = log2(value))][, .(mean = mean(log2value), var = var(log2value), .N), by = .(position, strand, label)]
+    kinetics_summary[, "pvalue" := list(welch.t.pvalue(mean, var, N, global_mean, global_var, global_size))]
+    kinetics_summary[, "region" := list(ifelse(substr(label, 1, 1) == "s", "Upstream", ifelse(substr(label, 1, 1) == "m", "Motif", ifelse(substr(label, 1, 1) == "e", "Downstream", "Unknown"))))]
+    kinetics_summary$strand <- factor(kinetics_summary$strand, levels = c("+", "-"))
+    kinetics_summary$region <- factor(kinetics_summary$region, levels = c("Upstream", "Motif", "Downstream", "Unknown"))
+    g1 <- ggplot(kinetics_summary, aes(position, mean, color = region)) + geom_point() + geom_errorbar(aes(ymin = mean - sqrt(var), ymax = mean + sqrt(var))) +
+        facet_grid(strand ~ ., labeller = label_both) +
+        theme(panel.grid = element_blank()) +
+        coord_cartesian(ylim = c(-2.5, 2.5)) +
+        ggtitle(title_text, subtitle = "(p-values based on Welch's t-tests, in which an individual mean was compared with the global mean, were written on each column)") + ylab(ylab_text) +
+        geom_hline(yintercept = global_mean, linetype = "dashed") +
+        geom_text(aes(y = Inf, label = format(pvalue, digits = 3, scientific = T)), show.legend = F, angle = 90, hjust = 1.2, size = 2, color = "black")
+        #scale_x_continuous(breaks = kinetics_summary$position, labels = kinetics_summary$label)
+        #scale_x_continuous(breaks = 1:kinetics_summary[,max(position)], labels = kinetics_summary$label)
+    print(g1)
+}
+
+args <- commandArgs(trailingOnly = TRUE)
+motif <- args[1]
+
+ab_ipd <- fread("motif_ipd.ab.csv")
+cd_ipd <- fread("motif_ipd.cd.csv")
+PD2182_ipd <- fread("motif_ipd.PD2182.csv")
+PD2182sequel_ipd <- fread("motif_ipd.PD2182sequel.csv")
+k_normBy_ab_ipdratio <- fread("motif_ipdratio.k_normBy_ab.csv")
+l_normBy_cd_ipdratio <- fread("motif_ipdratio.l_normBy_cd.csv")
+
+# These constants were derived from deep regions (coverage >= 25).
+ab_log2ipd_mean <- -0.1889734
+ab_log2ipd_var <- 0.4976316
+ab_log2ipd_size <- 27095150
+cd_log2ipd_mean <- -0.1902569
+cd_log2ipd_var <- 0.5337555
+cd_log2ipd_size <- 46121818
+PD2182_log2ipd_mean <- -0.144740199751773
+PD2182_log2ipd_var <- 0.4165849
+PD2182_log2ipd_size <- 1356981
+PD2182sequel_log2ipd_mean <- -0.192455782396496
+PD2182sequel_log2ipd_var <- 0.8454646
+PD2182sequel_log2ipd_size <- 166271875
+k_normBy_ab_log2ipdratio_mean <- -0.008352887
+k_normBy_ab_log2ipdratio_var <- 0.3137371
+k_normBy_ab_log2ipdratio_size <- 19539347
+l_normBy_cd_log2ipdratio_mean <- -0.001731761
+l_normBy_cd_log2ipdratio_var <- 0.2929514
+l_normBy_cd_log2ipdratio_size <- 35514409
+
+pdf("plot_motif_kinetics.pdf", width = 16, height = 8)
+plot_motif_kinetics(ab_ipd, paste0(motif, ": log2 IPD; the mean +/- the standard deviation; sample AB"), "log2 IPD (the mean +/- the standard deviation)", ab_log2ipd_mean, ab_log2ipd_var, ab_log2ipd_size)
+plot_motif_kinetics(cd_ipd, paste0(motif, ": log2 IPD; the mean +/- the standard deviation; sample CD"), "log2 IPD (the mean +/- the standard deviation)", cd_log2ipd_mean, cd_log2ipd_var, cd_log2ipd_size)
+plot_motif_kinetics(PD2182_ipd, paste0(motif, ": log2 IPD; the mean +/- the standard deviation; sample PD2182 (PacBio RS II)"), "log2 IPD (the mean +/- the standard deviation)", PD2182_log2ipd_mean, PD2182_log2ipd_var, PD2182_log2ipd_size)
+plot_motif_kinetics(PD2182sequel_ipd, paste0(motif, ": log2 IPD; the mean +/- the standard deviation; sample PD2182sequel (PacBio Sequel)"), "log2 IPD (the mean +/- the standard deviation)", PD2182sequel_log2ipd_mean, PD2182sequel_log2ipd_var, PD2182sequel_log2ipd_size)
+plot_motif_kinetics(k_normBy_ab_ipdratio, paste0(motif, ": log2 IPD ratio; the mean +/- the standard deviation; sample K normalized by AB"), "log2 IPD ratio (the mean +/- the standard deviation)", k_normBy_ab_log2ipdratio_mean, k_normBy_ab_log2ipdratio_var, k_normBy_ab_log2ipdratio_size)
+plot_motif_kinetics(l_normBy_cd_ipdratio, paste0(motif, ": log2 IPD ratio; the mean +/- the standard deviation; sample L normalized by CD"), "log2 IPD ratio (the mean +/- the standard deviation)", l_normBy_cd_log2ipdratio_mean, l_normBy_cd_log2ipdratio_var, l_normBy_cd_log2ipdratio_size)
+invisible(dev.off())

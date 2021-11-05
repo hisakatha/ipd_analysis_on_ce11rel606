@@ -78,6 +78,11 @@ $(EXTREME_IPD_FULL_FA): %.fullLength.gff.fa: %.fullLength.gff %.gff.fa
 	cat $< | bedtools getfasta -bed - -fi $(FA) -s > $@
 	@cmp $@ $(word 2,$^) || echo "WARNING: There are partial-length regions in $<. You have to use $@ for MEME." >&2
 
+EXTREME_IPD_FULL_SORTED_BED := $(EXTREME_IPD_FULL:=.sorted.bed)
+$(EXTREME_IPD_FULL_SORTED_BED): %.sorted.bed: %
+	bedtools sort -i $< -faidx $(FAI) | awk -v OFS="\t" '{print $$1,$$4-1,$$5,$$3,$$6,$$7}' > $@
+target += $(EXTREME_IPD_FULL_SORTED_BED)
+
 $(EXTREME_IPD_FULL_Celegans): %.c_elegans.gff: %.gff
 	(cat $< | grep -v "E._coli" || [[ $$? == 1 ]]) > $@
 
@@ -138,6 +143,11 @@ $(MOD_FA): %.fa: %
 MOD_FULL := $(MOD_SLOP:.gff=.fullLength.gff)
 $(MOD_FULL): %.fullLength.gff: %.gff
 	cat $< | grep -v '^#' | awk -v EXPECTED=$$(($(MSLOP) * 2 + 1)) '{if($$5 - $$4 + 1 == EXPECTED){print}}' > $@
+
+MOD_FULL_SORTED_BED := $(MOD_FULL:=.sorted.bed)
+$(MOD_FULL_SORTED_BED): %.sorted.bed: %
+	bedtools sort -i $< -faidx $(FAI) | awk -v OFS="\t" '{print $$1,$$4-1,$$5,$$3,$$6,$$7}' > $@
+target += $(MOD_FULL_SORTED_BED)
 
 MOD_FULL_FA := $(MOD_FULL:=.fa)
 $(MOD_FULL_FA): %.fullLength.gff.fa: %.fullLength.gff %.gff.fa
@@ -250,6 +260,11 @@ MOD_SHUF_SLOP_FULL_FA := $(MOD_SHUF_SLOP_FULL:=.fa)
 $(MOD_SHUF_SLOP_FULL_FA): %.fa: %
 	cat $< | bedtools getfasta -bed - -fi $(FA) -s > $@
 target += $(MOD_SHUF_SLOP_FULL_FA)
+
+MOD_SHUF_SLOP_FULL_SORTED_BED := $(MOD_SHUF_SLOP_FULL:=.sorted.bed)
+$(MOD_SHUF_SLOP_FULL_SORTED_BED): %.sorted.bed: %
+	bedtools sort -i $< -faidx $(FAI) | awk -v OFS="\t" '{print $$1,$$4-1,$$5,$$3,$$6,$$7}' > $@
+target += $(MOD_SHUF_SLOP_FULL_SORTED_BED)
 
 # For counting the size of the regions
 MOD_SHUF_SLOP_FULL_MERGED := $(MOD_SHUF_SLOP_FULL:=.merged)

@@ -7,7 +7,7 @@
 #$ -N ipdSummary
 #$ -pe smp 24
 
-. /glusterfs/hisakatha/methylation/smrtpipe/setup.sh
+export PATH="/bio/package/pacbio/smrtlink/smrtcmds/bin:$PATH"
 
 fname="ipd_summary_high_mapq"
 ipdSummary output/tasks/pbalign.tasks.pbalign-0/mapped.alignmentset.bam --reference ../ce11rel606.xml --gff $fname.gff --bigwig $fname.bw --csv_h5 $fname.h5 --numWorkers 24 --pvalue 0.001 --verbose --maxLength 3000000000000 --methylFraction --identify m6A,m4C --mapQvThreshold 128
