@@ -39,12 +39,13 @@ cor_pdf_celegans := plot_kinetics_correlation.c_elegans.pdf
 cor_pdf_celegans_ecoli := plot_kinetics_correlation.celegans_ecoli.pdf
 cor_pdf_celegans_ecoli_subset1 := plot_kinetics_correlation.celegans_ecoli_subset1.pdf
 cor_pdf_celegans_ecoli_subset1_positive_strand := plot_kinetics_correlation.celegans_ecoli_subset1_positive_strand.pdf
+cor_pdf_celegans_ecoli_subset2_positive_strand := plot_kinetics_correlation.celegans_ecoli_subset2_positive_strand.pdf
 
 .SECONDEXPANSION:
 target := $(motif_kinetics_pdf) $(motif_kinetics_stderr_pdf) $(motif_kinetics_stderr_widey_pdf) $(cor_pdf) $(motif_wga_ipdratios) $(motif_hawaiian_ipdratios) $(cor_pdf2)
 target += $(motif_kinetics_csv_celegans) $(cor_pdf_celegans)
 target += $(motif_modelPrediction) $(motif_modelPrediction_celegans)
-target += $(motif_kinetics_csv_ecoli) $(motif_modelPrediction_ecoli) $(cor_pdf_celegans_ecoli) $(cor_pdf_celegans_ecoli_subset1) $(cor_pdf_celegans_ecoli_subset1_positive_strand)
+target += $(motif_kinetics_csv_ecoli) $(motif_modelPrediction_ecoli) $(cor_pdf_celegans_ecoli) $(cor_pdf_celegans_ecoli_subset1) $(cor_pdf_celegans_ecoli_subset1_positive_strand) $(cor_pdf_celegans_ecoli_subset2_positive_strand)
 target += $(motif_summary_target)
 all: $$(target)
 
@@ -189,6 +190,9 @@ $(cor_pdf_celegans_ecoli_subset1): $(motif_kinetics_csv_celegans) $(motif_kineti
 
 $(cor_pdf_celegans_ecoli_subset1_positive_strand): $(motif_kinetics_csv_celegans) $(motif_kinetics_csv_ecoli)
 	Rscript ../plot_kinetics_correlation.celegans_ecoli_subset1_positive_strand.R
+
+$(cor_pdf_celegans_ecoli_subset2_positive_strand): $(motif_kinetics_csv_celegans) $(motif_kinetics_csv_ecoli)
+	Rscript ../plot_kinetics_correlation.celegans_ecoli_subset2_positive_strand.R
 
 $(motif_modelPrediction): motif_modelPrediction.%.csv: motif_ipd.%.csv motif_ipdratio.%.csv
 	Rscript ../get_motif_modelPrediction_from_ipdRatio.R $< $(word 2,$^) $@ && touch $@

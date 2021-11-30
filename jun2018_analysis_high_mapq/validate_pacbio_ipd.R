@@ -7,12 +7,13 @@ coverage_thres <- 25
 bases <- c("A", "C", "G", "T")
 
 csv_name <- sprintf("validate_pacbio_ipd.coverage%g.csv", coverage_thres)
+file.remove(csv_name)
 
 library(ggplot2)
 
 plot_ipdratio_with_or_without_pacbio_estimate <- function(data, name) {
-    x.label <- bquote(log[2] ~ "(IPD observed in" ~ .(name) ~ ")")
-    y.label <- bquote(log[2] ~ "(IPD predicted using the PacBio software)")
+    x.label <- bquote(log[2] ~ "(IPD ratio observed in" ~ .(name) ~ ")")
+    y.label <- bquote(log[2] ~ "(IPD ratio predicted using the PacBio software)")
     subdata <- data[native_tMean > 0 & control_tMean > 0]
     subdata[, c("log2_ipdRatio_without_pacbio", "log2_ipdRatio_with_pacbio") := .(log2(native_tMean / control_tMean), log2(native_tMean / modelPrediction))]
     subdata_stat <- subdata[, .(.N, cor.value = Inf, p.value = Inf, r_square = Inf, rmse = Inf, sample = name, coverage_thres = 0), by = base]
@@ -53,7 +54,7 @@ plot_ipdratio_with_or_without_pacbio_estimate <- function(data, name) {
         geom_abline(intercept = 0, slope = 1, linetype = "dashed")
     if(subdata[,.N] == 0){ p <- ggplot() + annotate("text", x = 1, y = 1, label = "No data") }
     #p <- p + ggtitle(sprintf("%s (coverage >= %g): IPD ratio comparison with or without PacBio estimates per base", name, coverage_thres), subtitle = "with Pearson's correlation tests") + xlab(x.label) + ylab(y.label)
-    x.label <- bquote(log[2] ~ "(IPD observed in" ~ .(name) ~ "with its depth" >= ~ .(coverage_thres) ~ ")")
+    x.label <- bquote(log[2] ~ "(IPD ratio observed in" ~ .(name) ~ "with its depth" >= ~ .(coverage_thres) ~ ")")
     p <- p + xlab(x.label) + ylab(y.label)
     print(p)
     print(p + scale_fill_continuous(trans = "log10"))
