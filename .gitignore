@@ -47,5 +47,5 @@ test_dataset
 !*.sh
 !*.xml
 !*.R
-!Makefile
+!Makefile*
 !*.makefile
