@@ -26,12 +26,12 @@ plot_value_per_kmer.wga_vs_native <- function(summary_data_wga, summary_data_nat
     summary_data <- rbindlist(list(summary_data_wga2, summary_data_native2))
     summary_data$type <- factor(summary_data$type, levels = c(type1, type2))
     plot_data <- summary_data[substr(kmer_string, 2, 2) == "A" & position == 2]
-    p1 <- ggplot(plot_data, aes(kmer_string, !!y_expr, color = type)) + geom_point(alpha = 0.5) +
+    p1 <- ggplot(plot_data, aes(kmer_string, !!y_expr, color = type)) + geom_point(alpha = 0.8) +
         xlab(xlab_text) + ylab(ylab_text) +
         ggtitle(title_text) +
         labs(color = "Sample") +
         theme_classic() +
-        theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5, family = "mono"))
+        theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5, family = "mono", face = "bold"))
     print(p1)
 }
 
@@ -71,7 +71,7 @@ summary_l_mito <- convert_sum_data(stats_l[chromosome == mito_chr])
 summary_abcd_mito <- convert_sum_data(stats_abcd[chromosome == mito_chr])
 summary_kl_mito <- convert_sum_data(stats_kl[chromosome == mito_chr])
 
-pdf("ipd_at_second_adenine.wga_vs_native.pdf", height = 3, width = 10)
+cairo_pdf("ipd_at_second_adenine.wga_vs_native.pdf", height = 2.5, width = 9, onefile = TRUE)
 plot_value_per_kmer.wga_vs_native(summary_ab_ecoli, summary_k_ecoli, "Replicate 1 / E. coli", ylab_text_ipd, ipd_mean)
 plot_value_per_kmer.wga_vs_native(summary_ab_celegans, summary_k_celegans, "Replicate 1 / C. elegans", ylab_text_ipd, ipd_mean)
 plot_value_per_kmer.wga_vs_native(summary_ab_celegans_nuclear, summary_k_celegans_nuclear, "Replicate 1 / C. elegans nuclear", ylab_text_ipd, ipd_mean)

@@ -885,33 +885,52 @@ invisible(dev.off())
 
 # Comparison table
 ncol3 <- 4
-pdf_width <- 3.5 * ncol3
-pdf_height_select1 <- 4 * height_per_motif
+pdf_width <- 2.5 * ncol3
+pdf_height_select1 <- 3 * height_per_motif
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_cd_celegans.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- ab_cd_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
 invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.k_l_celegans.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- k_l_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
 invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_k_celegans.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- ab_k_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
+invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.cd_l_celegans.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- cd_l_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
+invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_cd_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- ab_cd_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
 invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.k_l_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- k_l_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
+invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.ab_k_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- ab_k_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
+invisible(dev.off())
+
 pdf("arrange_plot_motif_kinetics.v7_linear_positive_strand_single_column.all.select1_replicate_comparison_outside10.table.cd_l_ecoli.pdf", width = pdf_width, height = pdf_height_select1)
 plots <- cd_l_ecoli_comparison_plots_outside10[motifs_select1]
 print(plot_grid(plotlist = plots, align = "none", ncol = ncol3))
+print(plot_grid(plotlist = lapply(plots, function(x){x + theme(legend.position="none")}), align = "none", ncol = ncol3))
 invisible(dev.off())

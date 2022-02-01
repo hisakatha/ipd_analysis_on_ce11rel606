@@ -211,6 +211,7 @@ $(DEEP_REGION_FA): $(DEEP_REGION)
 
 $(DEEP_REGION_SLOP): $(DEEP_REGION)
 	cat $^ | $(BEDT) slop -b $(SLOP) -g $(FAI) > $@
+# bedtools getfasta returns fasta records with 0-based coordinate headers
 $(DEEP_REGION_SLOP_FA): $(DEEP_REGION_SLOP)
 	$(BEDT) getfasta -fi $(REF) -bed $< > $@
 $(HQ_DEEP_REGION_SLOP): $(HQ_DEEP_REGION)

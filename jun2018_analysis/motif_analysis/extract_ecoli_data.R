@@ -16,6 +16,7 @@ if (ncol(occ) == 0) {
     occ <- data.table(chr=character(0), start=integer(0), strand=character(0))
 }
 
-src.ecoli <- occ[chr == chr.ecoli, .I]
+occ[, "index" := .(.I)]
+src.ecoli <- occ[chr == chr.ecoli, index]
 data.ecoli <- data[src %in% src.ecoli]
 fwrite(data.ecoli, file = out.path)

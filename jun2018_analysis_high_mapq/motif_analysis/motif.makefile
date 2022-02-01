@@ -206,3 +206,9 @@ $(count_occ_simple): $(merged_occ)
 	../count_occ_simple_per_motif.sh > $@
 
 target += $(count_occ_simple)
+
+motif_summary_input3 := $(motif_kinetics_csv_celegans) $(motif_kinetics_csv_ecoli) $(motif_modelPrediction_celegans) $(motif_modelPrediction_ecoli)
+motif_summary_target3 := $(motif_summary_input3:.csv=.summary3.csv)
+$(motif_summary_target3): %.summary3.csv: %.csv
+	../summarize_motif_kinetics3.py $< $@
+target += $(motif_summary_target3)

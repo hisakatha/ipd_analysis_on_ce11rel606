@@ -495,3 +495,8 @@ target += $(DEEP_KINETICS_BASIC) $(DEEP_KINETICS_SLOP_FA) $(DEEP_KINETICS_SLOP_M
 ## Debug
 print-%  : ; @echo $* = $($*)
 
+COLLECT_IPD := /glusterfs/hisakatha/methylation/svr_ipd/collect_ipd_per_kmer/collect_ipd
+kinetics_stats_v2_ab := kinetics_stats_v2.ab_deep.csv
+$(kinetics_stats_v2_ab): ../jun2018_ab_pcr_vc2010_op50_no_chunk/ipd_summary_high_mapq.h5
+	$(COLLECT_IPD) -k 1 -l 0 -t 25 -o $@ $<
+target += $(kinetics_stats_v2_ab)
